@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Кабинет 26-01 · 26-02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=PT+Sans:wght@400;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   НАСТРОЙКИ КАБИНЕТА — менять только здесь
+   ===================================================================== */
+const CONFIG = {
+  TITLE: "Кабинет групп 26-01 и 26-02",
+  SUBTITLE: "на базе 9 класса",
+  GROUPS: ["26-01", "26-02"],
+  DATE: "2026-11-03",          // день занятий (год-месяц-день)
+
+  // Открывать уроки по времени: false — все уроки открыты сразу,
+  // true — урок откроется в своё время начала (по Москве)
+  TIME_LOCK: false,
+
+  // Режим проверки: true — внизу главной есть кнопка «Сбросить прогресс».
+  // Перед выдачей ссылки студентам поставить false.
+  // Сбросить можно и так: добавить ?reset в конце ссылки.
+  TEST_MODE: false,
+
+  // Google-форма для результатов (заполним вместе)
+  FORM: {
+    action: "https://docs.google.com/forms/d/e/1FAIpQLScve3RlCw8fJHf0PMgNUGuflxa2o5vaNbE9kZbBQRc9QGu4ww/formResponse",
+    fields: {
+      name: "entry.694937331", group: "entry.1822141862", lesson: "entry.2018811988",
+      score: "entry.994546882", max: "entry.1516389025", percent: "entry.974916554",
+      answer: "entry.1837322036", details: "entry.1762429955", code: "entry.160939069"
+    }
+  }
+};
+
+// Расписание: время по Москве
+const SCHEDULE = [
+  { id: "lit6", start: "09:45", end: "10:30", subject: "Литература",
+    title: "Дело Раскольникова", note: "Лекция №6 · Ф. М. Достоевский, «Преступление и наказание»" },
+  { id: "math2", start: "11:25", end: "12:10", subject: "Математика",
+    title: "Смена в диспетчерской", note: "Т4.4 Функции, их свойства. Способы задания функций · Т4.5 Тригонометрические функции, их свойства и графики" },
+  { id: "geo3", start: "13:15", end: "14:00", subject: "География",
+    title: "Профиль страны", note: "Политическая география и геополитика. Классификация и типология стран мира" }
+];
+/* ===================================================================== */
+</script>
+<style>
+:root{
+  --paper:#efe6d2; --card:#fbf7ee; --ink:#2a2521; --muted:#6e6458; --line:#d9ccb1;
+  --red:#9e2a1e; --red-soft:#f3dcd6; --ok:#2f6a3b; --ok-soft:#dcebdc; --hi:#e8d9b4;
+  --serif:"PT Serif",Georgia,serif; --sans:"PT Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:1.5}
+body{background-image:radial-gradient(rgba(120,90,40,.06) 1px,transparent 1px);background-size:6px 6px}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-weight:700;line-height:1.2;margin:0 0 .4em}
+h1{font-size:30px} h2{font-size:24px} h3{font-size:19px}
+p{margin:0 0 .8em}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.sans{font-family:var(--sans)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;margin:0 0 16px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 6px 18px -12px rgba(60,40,10,.35)}
+.folder{position:relative;border-top:6px solid var(--red)}
+.tag{display:inline-block;font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);font-weight:700;margin-bottom:6px}
+.stamp{display:inline-block;border:2px solid var(--red);color:var(--red);font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;transform:rotate(-3deg)}
+.btn{font-family:var(--sans);font-size:16px;font-weight:700;border:0;border-radius:4px;background:var(--ink);color:#fff;padding:12px 18px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.red{background:var(--red)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type=text],select,textarea{font:inherit;font-family:var(--sans);width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:4px;background:#fff;color:var(--ink)}
+textarea{min-height:150px;font-family:var(--serif)}
+label{font-family:var(--sans);font-size:14px;font-weight:700;display:block;margin:10px 0 4px}
+
+/* расписание */
+.lesson{display:flex;gap:16px;align-items:flex-start;cursor:pointer;transition:transform .1s}
+.lesson:hover{transform:translateY(-1px)}
+.lesson.dis{cursor:default;opacity:.6}
+.lesson .time{font-family:var(--sans);font-weight:700;min-width:64px}
+.lesson .time small{display:block;font-weight:400;color:var(--muted)}
+.lesson .body{flex:1}
+.lesson.now{border-color:var(--red);box-shadow:0 0 0 2px var(--red)}
+.status{font-family:var(--sans);font-size:13px;font-weight:700;padding:3px 8px;border-radius:3px;background:var(--hi);white-space:nowrap}
+.status.now{background:var(--red);color:#fff}
+.status.done{background:var(--ok-soft);color:var(--ok)}
+.status.lock{background:#e4e0d8;color:var(--muted)}
+
+/* шапка урока */
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;font-family:var(--sans);font-size:14px}
+.steps{display:flex;gap:4px;margin:0 0 18px}
+.steps i{flex:1;height:5px;background:var(--line);border-radius:3px}
+.steps i.on{background:var(--ink)} .steps i.cur{background:var(--red)}
+.pts{font-weight:700}
+.link{background:none;border:0;font:inherit;color:var(--muted);text-decoration:underline;cursor:pointer;padding:0}
+
+/* материалы дела */
+.brief ul{padding-left:20px;margin:0 0 .8em} .brief li{margin-bottom:6px}
+.quote{border-left:3px solid var(--red);padding:4px 0 4px 14px;font-style:italic;margin:10px 0}
+.note{background:var(--hi);border-radius:4px;padding:12px 14px;font-size:16px}
+.note b{font-family:var(--sans)}
+
+/* задания */
+.item{border:1px solid var(--line);border-radius:5px;padding:12px;margin-bottom:10px;background:#fff}
+.item.ok{border-color:var(--ok);background:var(--ok-soft)}
+.item.bad{border-color:var(--red);background:var(--red-soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-family:var(--sans);font-size:14px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:20px;padding:5px 12px;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff}
+.chip:disabled{cursor:default}
+.why{font-size:15px;margin-top:8px;display:none}
+.checked .why{display:block}
+.opt{display:block;width:100%;text-align:left;font:inherit;background:#fff;border:1.5px solid var(--line);border-radius:5px;padding:12px 14px;margin-bottom:8px;cursor:pointer;color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--red);background:var(--red-soft)}
+.opt:disabled{cursor:default}
+
+/* допрос */
+.chat{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.msg{max-width:88%;padding:10px 14px;border-radius:6px;font-size:16px}
+.msg .who{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px;color:var(--muted)}
+.msg.r{background:#fff;border:1px solid var(--line);align-self:flex-start}
+.msg.me{background:var(--ink);color:#fff;align-self:flex-end}
+.msg.me .who{color:#cfc6b8}
+.msg.p{background:var(--hi);align-self:flex-start;font-style:italic}
+.meter{font-family:var(--sans);font-size:13px;margin-bottom:14px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:4px}
+.bar b{display:block;height:100%;background:var(--red);transition:width .5s}
+
+/* порядок */
+.ord{display:flex;align-items:center;gap:10px}
+.ord .n{font-family:var(--sans);font-weight:700;min-width:22px}
+.ord .t{flex:1}
+.ord .mv{display:flex;flex-direction:column;gap:2px}
+.ord .mv button{border:1px solid var(--line);background:var(--card);border-radius:3px;width:34px;height:26px;cursor:pointer;font-size:13px}
+
+.fill{margin-bottom:14px}
+.fill select{display:block;width:100%;max-width:100%;margin:6px 0;padding:8px 10px}
+.res td{padding:6px 8px;border-bottom:1px solid var(--line)} .res td:last-child{text-align:right;font-family:var(--sans);font-weight:700}
+.res{width:100%;border-collapse:collapse;margin:8px 0 14px}
+.big{font-size:44px;font-weight:700;font-family:var(--sans);line-height:1}
+.codebox{font-family:Consolas,Menlo,monospace;font-size:13px;background:#fff;border:1px dashed var(--line);padding:10px;border-radius:4px;word-break:break-word}
+/* фирменный стиль колледжа: главная страница кабинета */
+body.brand{--paper:#F4F5F7;--card:#fff;--ink:#222;--muted:#5f636b;--line:#e2e4e9;--hi:#EFFE74;--serif:"Manrope",system-ui,sans-serif;--sans:"Manrope",system-ui,sans-serif;background-image:none}
+body.brand h1,body.brand h2,body.brand h3{font-weight:800;letter-spacing:-.01em}
+body.brand .card{border-radius:18px;box-shadow:none}
+body.brand .folder{background:#7199F1;border:0}
+body.brand .folder .muted,body.brand .folder .link{color:#222;opacity:.75}
+body.brand .tag{color:#222;background:#EFFE74;padding:3px 10px;border-radius:20px;letter-spacing:.03em;font-size:11px}
+body.brand .folder .tag{background:#fff}
+body.brand .btn{border-radius:12px;background:#222}
+body.brand input[type=text],body.brand select{border-radius:12px;border-color:#fff}
+body.brand .lesson.now{border-color:#7199F1;box-shadow:0 0 0 2px #7199F1}
+body.brand .status{background:#F4F5F7;border-radius:20px;padding:4px 10px}
+body.brand .status.now{background:#EFFE74;color:#222}
+body.brand .status.done{background:#dfe8fc;color:#222}
+body.brand .lesson.dis{opacity:.55}
+.mini{border-collapse:collapse;font-family:var(--sans);font-size:14px;margin:4px 0}
+.mini td{border:1px solid var(--line);padding:4px 10px;text-align:center}
+.mini td:first-child{font-weight:700;background:#f4f5f7}
+.item svg{max-width:100%}
+body.brand .steps i.cur{background:#7199F1}
+body.brand .btn.red{background:#222}
+body.brand .btn.ghost{background:transparent;color:#222;border:1.5px solid #222}
+body.brand .stamp{border-color:#222;color:#222;transform:none;border-radius:20px;background:#fff}
+body.brand .item,body.brand .opt{border-radius:12px}
+body.brand .note{border-radius:12px}
+.refcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0 14px}
+.refcard .rf{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line);font-family:var(--sans);font-size:15px}
+.refcard .rf:last-child{border-bottom:0}
+.refcard .rf span{color:var(--muted);min-width:110px}
+.refcard .rf b{text-align:right;font-weight:600}
+.refcard .rf.hid b{color:#b8bcc4;font-weight:400}
+.refcard .avatar{width:56px;height:56px;border-radius:50%;background:#EFFE74;display:flex;align-items:center;justify-content:center;font:800 26px var(--sans);margin-bottom:8px}
+.refcard .item{margin:8px 0}
+.tt{border-collapse:collapse;font-family:var(--sans);margin:8px 0 12px}
+.tt th,.tt td{border:1px solid var(--line);padding:6px 12px;text-align:center;background:#fff}
+.tt th{background:#f4f5f7;white-space:nowrap}
+.grid th,.grid td{padding:4px 6px}
+.grid .cell{width:34px}
+.tt tr.ok td{background:var(--ok-soft)} .tt tr.bad td{background:var(--red-soft)}
+.tt small{color:var(--red);font-weight:700}
+.bit,.cell{font:700 16px var(--sans);width:40px;height:34px;border:1.5px solid #222;border-radius:8px;background:#fff;cursor:pointer;color:#222}
+.bit.one,.cell.on{background:#EFFE74}
+.cell.ok{background:var(--ok-soft);border-color:var(--ok)} .cell.bad{background:var(--red-soft);border-color:var(--red)}
+.pickrow{cursor:pointer} .pickrow.sel td{background:#dfe8fc}
+.tt .mk{min-width:28px;font-weight:700}
+.meas{cursor:pointer} .meas.sel{border-color:#3b67d6;box-shadow:0 0 0 2px #3b67d6}
+.budget{padding:6px 0;margin-bottom:10px}
+@media (max-width:520px){h1{font-size:25px}.card{padding:16px}.lesson{flex-direction:column;gap:6px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ===================== СОДЕРЖАНИЕ УРОКОВ ===================== */
+const LESSONS = {
+lit6: {
+  title: "Дело Раскольникова",
+  intro: `<p>Петербург, 1865 год. Убита старуха-процентщица Алёна Ивановна и её сестра Лизавета. Кто это сделал, следователю Порфирию Петровичу уже ясно: бывший студент Родион Раскольников.</p>
+<p>Но Порфирию нужно другое: понять, <b>почему</b> он это сделал и что с ним будет дальше. Ты — помощник следователя. За 45 минут тебе предстоит собрать дело из семи частей.</p>
+<p class="muted small sans">Каждый этап засчитывается с первой попытки. После проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Улики", min: 6,
+    brief: `<ul>
+<li><b>Родион Раскольников</b>, 23 года, бывший студент юридического факультета. Бросил университет: нечем платить. Живёт в каморке, похожей «более на шкаф, чем на квартиру».</li>
+<li>Причины преступления в романе бывают двух видов. <b>Внешние</b> давят снаружи: бедность, случай, чужие беды. <b>Внутренние</b> живут в голове и душе героя: идея, гордость, характер.</li>
+</ul>
+<div class="quote">«Бедных в Петербурге тысячи. А топор взял один».<br><span class="small">— пометка Порфирия Петровича на полях</span></div>`,
+    parts: [
+    { type: "classify", title: "Разложи улики по папкам",
+      prompt: "Что из этого — внешняя причина, а что — внутренняя?",
+      bins: [{id:"out",label:"Внешняя"},{id:"in",label:"Внутренняя"}],
+      items: [
+        {t:"Долг квартирной хозяйке, нечем платить за учёбу", b:"out", w:"Нищета давит снаружи: это обстоятельство, а не решение."},
+        {t:"Письмо матери: Дуня выходит за Лужина, чтобы помочь брату", b:"out", w:"Жертва сестры ради него стала для Раскольникова невыносимой, но это событие извне."},
+        {t:"Исповедь Мармеладова в распивочной: Соня пошла «по жёлтому билету», чтобы кормить семью", b:"out", w:"Чужая беда, которая показала ему, как жестоко устроен мир."},
+        {t:"Случайно подслушанный в трактире разговор о старухе-процентщице", b:"out", w:"Случай: чужие слова совпали с его собственными мыслями."},
+        {t:"Случайно узнал на Сенной, что завтра в семь вечера Лизаветы не будет дома", b:"out", w:"Ещё один случай. Раскольников воспринял его как знак судьбы."},
+        {t:"Теория о двух разрядах людей: обыкновенных и необыкновенных", b:"in", w:"Идея, которую он сам создал и в которую поверил."},
+        {t:"Желание проверить себя: «тварь ли я дрожащая или право имею»", b:"in", w:"Главный внутренний мотив: убийство как проверка себя."},
+        {t:"Гордость и Наполеон как идеал", b:"in", w:"Он хочет быть среди тех, кому «всё разрешается»."},
+        {t:"Он «отвык от людей», ни с кем не общается и живёт своими мыслями", b:"in", w:"Отъединение от людей даёт теории расти без проверки жизнью."},
+        {t:"Уверенность, что великая цель оправдывает любые средства", b:"in", w:"Это убеждение, а не обстоятельство."}
+      ],
+      after: `<div class="note"><b>Вывод следствия.</b> Внешние обстоятельства давили на многих. Решающими стали внутренние: теория и гордость. Поэтому роман Достоевского не детектив: его интересует, что происходит с человеком, который поверил своей идее.</div>`
+    }]
+  },
+  { name: "Допрос", min: 12,
+    brief: `<ul>
+<li>Ещё в университете Раскольников написал статью <b>«О преступлении»</b>. Её напечатали в «Периодической речи», и Порфирий её прочёл.</li>
+<li>Суть теории: все люди делятся на <b>обыкновенных</b> («материал», живут в послушании) и <b>необыкновенных</b> (Ликург, Магомет, Наполеон). Необыкновенные имеют право «перешагнуть через труп, через кровь» ради своей идеи.</li>
+<li><b>«Арифметика».</b> В трактире студент говорит офицеру: убей старуху, возьми деньги и сделай на них сто добрых дел.</li>
+</ul>
+<div class="quote">«Одна смерть и сто жизней взамен — да ведь тут арифметика!»</div>
+<ul><li>Что было на деле: кошелёк и вещи Раскольников спрятал под камнем во дворе, даже не посмотрев, сколько там денег. Вместе со старухой он убил Лизавету.</li></ul>`,
+    parts: [
+    { type: "dialog",
+      title: "Допрос в кабинете Порфирия",
+      lead: "Порфирий кивает тебе: «Попробуйте-ка вы. Спорьте с ним, но фактами из его же жизни». За каждый сильный аргумент уверенность Раскольникова в теории падает.",
+      rounds: [
+        { line: "Все люди делятся на два разряда. Обыкновенные — материал. А необыкновенные имеют право переступить через кровь, если того требует их идея.",
+          opts: [
+            {t:"Кто решает, кто из людей необыкновенный? Сам человек? Тогда любой убийца объявит себя Наполеоном.", p:3,
+             r:"…Ну, ошибки возможны. Но ошибаются только обыкновенные, им и наказание.", n:"Отлично. Я спрашивал его о том же: как их отличить, «знаки, что ли, при рождении»? Ответа у него нет."},
+            {t:"Убивать запрещено законом.", p:0,
+             r:"Законы пишут обыкновенные для обыкновенных. Ликург и Наполеон тоже нарушали законы, а их называют великими.", n:"Закон он уже отбросил в своей статье. Здесь нужен другой аргумент."},
+            {t:"Вам до Наполеона далеко.", p:1,
+             r:"Речь не обо мне, а о принципе.", n:"Задели, но он ушёл от спора. Бейте в саму теорию."}
+          ]},
+        { line: "Старуха — вредная процентщица. На её деньги можно спасти сотни жизней. Одна смерть и сто жизней — это арифметика!",
+          opts: [
+            {t:"Где же эти сто жизней? Деньги вы спрятали под камень и даже не посмотрели, сколько там.", p:3,
+             r:"…Я… я не за деньги. Не в деньгах дело.", n:"Вот оно. Арифметика рассыпалась: деньги ему были не нужны. Значит, дело было в другом."},
+            {t:"Математически всё верно, но звучит жестоко.", p:0,
+             r:"Жестоко — это когда сотни гибнут, а все смотрят. Вы же сами согласились, что расчёт верен.", n:"Вы признали его расчёт. Так его не поймать."},
+            {t:"Сто жизней — это только обещание. Никто не знает, спасёт ли он кого-то.", p:1,
+             r:"Если не верить в цель, ничего великого не сделать.", n:"Мысль верная, но абстрактная. Есть факт сильнее."}
+          ]},
+        { line: "Я убил вошь, бесполезную, гадкую, зловредную.",
+          opts: [
+            {t:"А Лизавета, кроткая и безответная, тоже вошь? Вы убили её только потому, что она вошла.", p:3,
+             r:"…Лизавету… я о ней и не думал.", n:"Он о ней «не думал», а она была. Теория не учла живого человека."},
+            {t:"Старуха — тоже человек.", p:1,
+             r:"Человек, который пьёт кровь из бедных.", n:"Правда, но он к этому готов. Ищите то, чего в теории не было."},
+            {t:"Слово «вошь» — это преувеличение.", p:0,
+             r:"Это точное слово.", n:"Спор о словах, а не о сути."}
+          ]},
+        { line: "Я мучаюсь не от совести. Я просто слаб. Наполеон бы не мучился.",
+          opts: [
+            {t:"Это не слабость, а совесть. Теория у вас в голове, а натура против: вы заболели сразу после убийства.", p:3,
+             r:"Натура… Я не человека убил, я принцип убил! А переступить-то не переступил…", n:"Он сам это сказал. Теорию опровергла не полиция, а его собственная натура."},
+            {t:"Да, вы просто не Наполеон.", p:0,
+             r:"Вот видите: теория верна, это я для неё негоден.", n:"Вы приняли его логику. Теория уцелела."},
+            {t:"Вам нужно отдохнуть и показаться врачу.", p:1,
+             r:"Врач тут ни при чём.", n:"Болезнь — не причина, а следствие. Копните глубже."}
+          ]},
+        { who: "p", line: "Прямых улик у меня нет, только психология, а она «о двух концах». Что предложим Родиону Романычу?",
+          opts: [
+            {t:"Прийти самому и принять страдание. Это шанс начать новую жизнь.", p:3,
+             r:"…Я подумаю.", n:"Так я ему и сказал: «станьте солнцем, вас все и увидят». Явка с повинной ещё и смягчит приговор."},
+            {t:"Немедленно арестовать.", p:0,
+             r:"Арестуйте. Докажите.", n:"Улик нет. Он выйдет и больше никогда не признается."},
+            {t:"Отпустить: он и так наказан.", p:1,
+             r:"…", n:"Он наказан, но не спасён. Ему нужно выйти из одиночества, а не остаться в нём."}
+          ]}
+      ],
+      finale: `<div class="note"><b>Вывод следствия.</b> Теория рухнула не на суде, а внутри самого Раскольникова: деньги не взяты, «сто жизней» не спасены, убита невинная Лизавета, а совесть не дала ему жить. «Я себя убил, а не старушонку!» — скажет он потом Соне.</div>`
+    }]
+  },
+  { name: "Двойники", min: 6,
+    brief: `<ul>
+<li><b>Двойник</b> — персонаж, в котором идея главного героя доведена до предела. Двойники показывают Раскольникову, куда ведёт его теория.</li>
+<li><b>Пётр Петрович Лужин</b>, жених Дуни. Деловой человек, всё мерит выгодой. Его «теория целого кафтана»: заботься о себе, и общество от этого только выиграет.</li>
+<li><b>Аркадий Свидригайлов</b>. Человек, который давно позволил себе всё. Он говорит Раскольникову, что они похожи.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Чьё это?",
+      prompt: "Определи, к кому относится цитата или поступок.",
+      bins: [{id:"l",label:"Лужин"},{id:"s",label:"Свидригайлов"},{id:"r",label:"Раскольников"}],
+      items: [
+        {t:"«Возлюби, прежде всех, одного себя, ибо всё на свете на личном интересе основано»", b:"l", w:"Лужин излагает свою «экономическую» теорию."},
+        {t:"Подкладывает Соне сторублёвую бумажку, чтобы обвинить её в краже", b:"l", w:"Ради выгоды он готов погубить беззащитного человека."},
+        {t:"Хочет жениться на бедной девушке, чтобы она всю жизнь была ему обязана", b:"l", w:"Дуня для него выгодная покупка."},
+        {t:"«Мы с вами одного поля ягоды»", b:"s", w:"Свидригайлов видит в Раскольникове себе подобного."},
+        {t:"Представляет вечность как закоптелую баньку с пауками по углам", b:"s", w:"Для того, кому всё позволено, мир пуст."},
+        {t:"Раздаёт деньги детям Мармеладова, а потом «едет в Америку»", b:"s", w:"«Поездка в Америку» — его самоубийство."},
+        {t:"«Тварь ли я дрожащая или право имею…»", b:"r", w:"Главный вопрос Раскольникова к самому себе."},
+        {t:"Отдаёт последние деньги на похороны Мармеладова", b:"r", w:"Его живое сострадание, которое спорит с теорией."}
+      ]},
+    { type: "mc",
+      q: "«Доведите до последствий, что вы давеча проповедовали, и выйдет, что людей можно резать», — говорит Раскольников Лужину. Что он увидел в теории Лужина?",
+      opts: ["Ту же логику, что в своей: человека можно принести в жертву ради выгоды", "Правильную экономическую идею, с которой трудно спорить", "Насмешку над своей статьёй"], c: 0,
+      w: "Лужин — бытовая, мелкая версия теории Раскольникова. В нём Раскольников узнаёт себя, и это ему отвратительно."},
+    { type: "mc",
+      q: "Чем заканчивается путь Свидригайлова и что это говорит о теории «всё позволено»?",
+      opts: ["Каторгой и раскаянием: он понял свою ошибку", "Самоубийством: жизнь без нравственных границ приводит к пустоте", "Счастливой женитьбой на Дуне"], c: 1,
+      w: "Свидригайлов показывает, чем кончается «право переступить», если идти до конца: пустотой и смертью."}
+    ]
+  },
+  { name: "Воскресение", min: 5,
+    brief: `<ul>
+<li><b>Соня Мармеладова</b> тоже «переступила», но через себя, а не через других: пожертвовала собой ради семьи. Она не судит Раскольникова, а страдает вместе с ним.</li>
+<li>У Сони есть Новый Завет, подаренный Лизаветой. Из него она читает Раскольникову историю о <b>воскрешении Лазаря</b>: Лазарь четыре дня лежал во гробе, и Христос воскресил его.</li>
+<li>Соня велит ему пойти на перекрёсток, поклониться народу и поцеловать землю, которую он осквернил.</li>
+<li>В эпилоге Раскольников на каторге. Ему снится, что мир поразила «моровая язва»: микроскопические <b>трихины</b> вселяются в людей, и каждый считает только себя правым. Люди истребляют друг друга.</li>
+</ul>
+<div class="quote">«Их воскресила любовь».</div>`,
+    parts: [
+    { type: "order", title: "Восстанови ход событий",
+      prompt: "Расставь события в правильном порядке стрелками ↑ ↓.",
+      items: [
+        "Соня читает Раскольникову о воскрешении Лазаря",
+        "Раскольников признаётся Соне в убийстве",
+        "На Сенной площади он кланяется и целует землю",
+        "В полицейской конторе он говорит: «Это я убил…»",
+        "Суд: восемь лет каторги, Соня едет за ним в Сибирь",
+        "Болезнь и сон о трихинах — «моровой язве»",
+        "У реки он плачет, обняв колени Сони"
+      ]},
+    { type: "mc",
+      q: "Почему Соня читает Раскольникову именно историю о Лазаре?",
+      opts: ["Это просто её любимая глава", "Лазарь тоже был преступником и раскаялся", "Лазарь был мёртв и воскрес: Соня верит, что и «мёртвая» душа Раскольникова может ожить"], c: 2,
+      w: "Раскольников «себя убил». История Лазаря обещает ему воскресение, и в эпилоге оно начинается."}
+    ]
+  },
+  { name: "Наши дни", min: 6,
+    brief: `<p>Раскольниковы встречаются не только в романах. Чтобы узнать их логику, держи в голове две формулы:</p>
+<ul>
+<li><b>Логика Раскольникова:</b> «Я выше правил. Моя великая цель оправдывает жертвы».</li>
+<li><b>Логика Лужина:</b> «Мне выгодно, значит, правильно».</li>
+</ul>
+<p>Обычная ошибка или слабость человека — это ни то ни другое.</p>`,
+    parts: [
+    { type: "classify", title: "Чья логика?",
+      prompt: "Все ситуации придуманы. Определи, чья в них логика.",
+      bins: [{id:"r",label:"Раскольникова"},{id:"l",label:"Лужина"},{id:"n",label:"Ни то ни другое"}],
+      items: [
+        {t:"Блогер пишет: «Обычные люди — массовка. Те, кто реально меняет мир, имеют право не считаться с правилами»", b:"r", w:"Деление на «массовку» и «право имеющих» — теория из статьи «О преступлении»."},
+        {t:"Хакер взламывает богатую компанию: «Они всё равно вредные, а деньги я раздам нуждающимся. Одна кража — тысяча спасённых»", b:"r", w:"Это «арифметика» из трактира: одно зло ради сотни добрых дел."},
+        {t:"Директор увольняет сотрудника за неделю до премии: «Ничего личного, мне так выгоднее»", b:"l", w:"Без великой идеи, только личная выгода. Это Лужин."},
+        {t:"Студент списал контрольную, потому что не успел подготовиться, и теперь ему стыдно", b:"n", w:"Это обычный проступок. Никакой теории «права» за ним нет, а стыд говорит о живой совести."},
+        {t:"Учёный нарушает правила безопасности лаборатории: «Моё открытие важнее чужих рисков»", b:"r", w:"Великая цель ставится выше жизни и безопасности других."}
+      ]}
+    ]
+  },
+  { name: "Заключение", min: 5,
+    brief: `<p>Порфирий составляет итоговый протокол. Заполни пропуски: это быстрая проверка, что главное по лекции ты запомнил.</p>`,
+    parts: [
+    { type: "fill", title: "Протокол по делу",
+      items: [
+        {a:"Статья Раскольникова, которую прочёл Порфирий, называлась «О", o:["преступлении","наказании","Наполеоне"], c:0, z:"»."},
+        {a:"По теории, люди делятся на обыкновенных и", o:["свободных","необыкновенных","богатых"], c:1, z:"."},
+        {a:"Соня читает Раскольникову историю о воскрешении", o:["Иова","блудного сына","Лазаря"], c:2, z:"."},
+        {a:"Новый Завет Соне подарила", o:["Лизавета","Дуня","Катерина Ивановна"], c:0, z:"."},
+        {a:"Перелом в эпилоге наступает после болезни и сна о", o:["загнанной лошади","трихинах","Наполеоне"], c:1, z:"."}
+      ]}
+    ]
+  },
+  { name: "Вывод", min: 4,
+    brief: `<p>Последняя часть дела — твоё собственное заключение.</p>
+<p><b>Как написать:</b> одна мысль-позиция плюс одно доказательство из романа (событие, поступок или цитата). Можно опираться на всё, что ты собрал сегодня.</p>`,
+    parts: [
+    { type: "text", title: "Твоё заключение",
+      prompt: "В чём, по-твоему, главная ошибка теории Раскольникова? Сформулируй позицию и подкрепи её одним доказательством из романа. 3–5 предложений.",
+      min: 150, ph: "Я считаю, что главная ошибка теории в том, что…" }
+    ]
+  }
+  ]
+}
+};
+
+/* ---------- графики для уроков математики ---------- */
+let _clip = 0;
+function svgPlot(o){
+  const W = o.w || 300, H = o.h || 180, P = 26;
+  const [x0,x1] = o.x, [y0,y1] = o.y;
+  const X = x => P + (x - x0) / (x1 - x0) * (W - 2*P), Y = y => H - P - (y - y0) / (y1 - y0) * (H - 2*P);
+  const id = "cl" + (++_clip);
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block;margin:8px 0" role="img"><defs><clipPath id="${id}"><rect x="${P}" y="${P}" width="${W-2*P}" height="${H-2*P}"/></clipPath></defs>`;
+  s += `<rect x="${P}" y="${P}" width="${W-2*P}" height="${H-2*P}" fill="#fff" stroke="#e2e4e9"/>`;
+  (o.xt || []).forEach(([v,l]) => { s += `<line x1="${X(v)}" x2="${X(v)}" y1="${P}" y2="${H-P}" stroke="#eceef2"/><text x="${X(v)}" y="${H-P+14}" font-size="10" text-anchor="middle" fill="#5f636b" font-family="sans-serif">${l}</text>` });
+  (o.yt || []).forEach(([v,l]) => { s += `<line x1="${P}" x2="${W-P}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eceef2"/><text x="${P-4}" y="${Y(v)+3}" font-size="10" text-anchor="end" fill="#5f636b" font-family="sans-serif">${l}</text>` });
+  if (x0 <= 0 && x1 >= 0) s += `<line x1="${X(0)}" x2="${X(0)}" y1="${P}" y2="${H-P}" stroke="#9aa0aa"/>`;
+  if (y0 <= 0 && y1 >= 0) s += `<line x1="${P}" x2="${W-P}" y1="${Y(0)}" y2="${Y(0)}" stroke="#9aa0aa"/>`;
+  (o.c || []).forEach(c => {
+    let d = "";
+    if (c.f){
+      let pen = false; const lim = (y1 - y0) * 2;
+      for (let i = 0; i <= 600; i++){
+        const x = x0 + (x1 - x0) * i / 600, y = c.f(x);
+        if (!isFinite(y) || y > y1 + lim || y < y0 - lim){ pen = false; continue }
+        d += (pen ? "L" : "M") + X(x).toFixed(1) + " " + Y(y).toFixed(1); pen = true;
+      }
+    } else d = c.p.map((q,i) => (i ? "L" : "M") + X(q[0]).toFixed(1) + " " + Y(q[1]).toFixed(1)).join("");
+    s += `<path d="${d}" fill="none" stroke="${c.col || "#3b67d6"}" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#${id})"/>`;
+  });
+  (o.dots || []).forEach(([x,y]) => { s += `<circle cx="${X(x)}" cy="${Y(y)}" r="3.5" fill="#222"/>` });
+  return s + "</svg>";
+}
+const PI_T = [[-2*Math.PI,"−2π"],[-Math.PI,"−π"],[0,"0"],[Math.PI,"π"],[2*Math.PI,"2π"]];
+const trig = f => svgPlot({w:300,h:170,x:[-7,7],y:[-3,3],xt:PI_T,yt:[[-2,"−2"],[-1,"−1"],[1,"1"],[2,"2"]],c:[{f}]});
+const circlePts = r => Array.from({length:121},(_,i)=>[r*Math.cos(i*Math.PI/60), r*Math.sin(i*Math.PI/60)]);
+const FURN = [[0,-10],[1,0],[3,40],[6,0],[8,-20],[10,0],[12,20]];
+const furnFig = svgPlot({w:440,h:240,x:[0,12],y:[-25,45],
+  xt:[0,1,2,3,4,5,6,7,8,9,10,11,12].map(v=>[v,String(v)]), yt:[-20,-10,0,10,20,30,40].map(v=>[v,String(v)]), c:[{p:FURN}], dots:FURN})
+  + `<p class="small muted sans" style="margin-top:-4px">По горизонтали — время смены t, ч. По вертикали — отклонение температуры печи от нормы f(t), °C.</p>`;
+const mini = (rows) => `<table class="mini">${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const lineFig = (f, ymax, yt) => svgPlot({w:240,h:140,x:[0,10],y:[0,ymax],xt:[[0,"0"],[5,"5"],[10,"10"]],yt,c:[{f}]});
+
+LESSONS.math2 = {
+  title: "Смена в диспетчерской",
+  theme: "brand",
+  ui: { introStamp: "Инструктаж", start: "Начать смену", brief: "Инструктаж", doneStamp: "Допуск получен" },
+  intro: `<p>Сегодня твоя первая смена стажёром в диспетчерской завода. На мониторах графики: температура печи, работа насосов, нагрузка сети, вращение валов. Диспетчер должен читать их с первого взгляда.</p>
+<p>За 45 минут ты пройдёшь инструктаж из шести частей и получишь допуск к смене.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Функция или нет", min: 6,
+    brief: `<ul>
+<li><b>Функция</b> — правило, по которому каждому значению x соответствует <b>ровно одно</b> значение y. Записывают y = f(x).</li>
+<li><b>Область определения D(f)</b> — все x, для которых функция задана. <b>Область значений E(f)</b> — все y, которые она принимает.</li>
+<li><b>Как проверить по графику:</b> мысленно проведи вертикальную прямую в любом месте. Если она пересекает график больше одного раза, у одного x несколько y, и это не функция.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Какие мониторы показывают функцию?",
+      prompt: "Проверь каждый график правилом вертикальной прямой.",
+      bins: [{id:"y",label:"Функция"},{id:"n",label:"Не функция"}],
+      items: [
+        {t:"<b>Монитор 1</b>" + svgPlot({x:[-3,3],y:[-1,9],c:[{f:x=>x*x}]}), b:"y", w:"Любая вертикальная прямая пересекает параболу y = x² один раз."},
+        {t:"<b>Монитор 2</b>" + svgPlot({x:[-3.5,3.5],y:[-3,3],c:[{p:circlePts(2)}]}), b:"n", w:"Вертикальная прямая пересекает окружность в двух точках: у одного x два значения y."},
+        {t:"<b>Монитор 3</b>" + svgPlot({x:[-1,7],y:[-3,3],c:[{p:Array.from({length:51},(_,i)=>{const y=-2.5+i*0.1;return [y*y,y]})}]}), b:"n", w:"Это парабола «на боку»: при x = 4 получаются y = 2 и y = −2."},
+        {t:"<b>Монитор 4</b>" + svgPlot({x:[-6.5,6.5],y:[-2,2],c:[{f:x=>Math.sin(x)*1.5}]}), b:"y", w:"Волна, но каждому x соответствует одна точка графика."},
+        {t:"<b>Монитор 5</b>" + svgPlot({x:[-3,3],y:[-3,4],c:[{f:x=>1-x}]}), b:"y", w:"Прямая y = 1 − x. Любая наклонная прямая — функция."}
+      ]}
+    ]
+  },
+  { name: "Способы задания", min: 5,
+    brief: `<p>Одну и ту же функцию можно задать четырьмя способами:</p>
+<ul>
+<li><b>Словесно:</b> «стоимость такси — 50 ₽ за км плюс 100 ₽ за посадку».</li>
+<li><b>Формулой:</b> y = 100 + 50x.</li>
+<li><b>Таблицей:</b> x = 0, 1, 2 → y = 100, 150, 200.</li>
+<li><b>Графиком:</b> линия на координатной плоскости.</li>
+</ul>
+<p>Формула удобна для расчётов, таблица — для конкретных значений, график — чтобы сразу увидеть поведение процесса.</p>`,
+    parts: [
+    { type: "classify", title: "Разнеси данные по мониторам",
+      prompt: `На заводе три процесса. Время x — в минутах (для сети — в часах).<br>
+<b>Печь:</b> температура растёт на 20° каждую минуту, начиная со 100°.<br>
+<b>Насос:</b> из бака на 600 литров насос откачивает 50 литров в минуту.<br>
+<b>Сеть:</b> нагрузка не меняется, весь день 300 кВт.<br>К какому процессу относится каждая формула, таблица и график?`,
+      bins: [{id:"f",label:"Печь"},{id:"p",label:"Насос"},{id:"s",label:"Сеть"}],
+      items: [
+        {t:"y = 100 + 20x", b:"f", w:"Начальное значение 100, каждую минуту +20."},
+        {t:"y = 600 − 50x", b:"p", w:"Было 600 литров, каждую минуту −50."},
+        {t:"y = 300", b:"s", w:"y не зависит от x: значение постоянно."},
+        {t:mini([["x","0","1","2","3"],["y","600","550","500","450"]]), b:"p", w:"Каждый шаг значение уменьшается на 50."},
+        {t:mini([["x","0","1","2","3"],["y","300","300","300","300"]]), b:"s", w:"Значение не меняется."},
+        {t:mini([["x","0","1","2","3"],["y","100","120","140","160"]]), b:"f", w:"Каждый шаг значение растёт на 20."},
+        {t:lineFig(x=>300, 650, [[0,"0"],[300,"300"],[600,"600"]]), b:"s", w:"Горизонтальная прямая на уровне 300."},
+        {t:lineFig(x=>100+20*x, 650, [[0,"0"],[300,"300"],[600,"600"]]), b:"f", w:"Прямая растёт от 100."},
+        {t:lineFig(x=>600-50*x, 650, [[0,"0"],[300,"300"],[600,"600"]]), b:"p", w:"Прямая убывает от 600."}
+      ]}
+    ]
+  },
+  { name: "График печи", min: 9,
+    brief: `<p>По графику функции можно прочитать её свойства:</p>
+<ul>
+<li><b>Нули функции</b> — значения x, при которых f(x) = 0. На графике это точки пересечения с осью x.</li>
+<li><b>Возрастание:</b> при движении слева направо график идёт вверх. <b>Убывание:</b> вниз. Промежутки записывают через x, например [2; 5].</li>
+<li><b>Наибольшее и наименьшее значения</b> — самая высокая и самая низкая точки графика.</li>
+<li><b>Знак функции:</b> f(x) &gt; 0 там, где график выше оси x, и f(x) &lt; 0 там, где ниже.</li>
+<li>Квадратные скобки [ ] — конец промежутка входит, круглые ( ) — не входит.</li>
+</ul>`,
+    parts: [
+    { type: "mc", fig: furnFig, q: "Какова область определения функции, то есть за какое время есть данные?", opts:["[0; 12]","[−20; 40]","[1; 10]"], c:0, w:"Область определения — по горизонтали: график идёт от t = 0 до t = 12."},
+    { type: "mc", fig: furnFig, q: "Какова область значений функции?", opts:["[−10; 20]","[−20; 40]","[0; 12]"], c:1, w:"По вертикали: самая низкая точка −20, самая высокая 40."},
+    { type: "mc", fig: furnFig, q: "Найди нули функции: когда температура была точно в норме?", opts:["t = 0, 3 и 8","t = 3 и 8","t = 1, 6 и 10"], c:2, w:"Нули — точки пересечения с осью t: 1, 6 и 10 часов."},
+    { type: "mc", fig: furnFig, q: "На каких промежутках функция возрастает?", opts:["[0; 3] и [8; 12]","[3; 8]","[1; 6] и [10; 12]"], c:0, w:"График идёт вверх с 0 до 3 часов и с 8 до 12. Возрастание — про направление, а не про знак."},
+    { type: "mc", fig: furnFig, q: "Каково наибольшее значение функции и когда оно достигается?", opts:["20 при t = 12","40 при t = 3","12 при t = 40"], c:1, w:"Самая высокая точка графика: f(3) = 40."},
+    { type: "mc", fig: furnFig, q: "Когда температура была выше нормы, то есть f(t) > 0?", opts:["(1; 6) и (10; 12]","[0; 3] и [8; 12]","(6; 10)"], c:0, w:"График выше оси t между 1 и 6 часами и после 10. В нулях f(t) = 0, поэтому скобки круглые."}
+    ]
+  },
+  { name: "Синусоида", min: 8,
+    brief: `<ul>
+<li><b>Единичная окружность</b> — окружность радиусом 1 с центром в начале координат. Угол отсчитывают от положительного направления оси x против часовой стрелки.</li>
+<li>Поверни точку на угол α. Тогда её <b>высота</b> (координата y) — это <b>sin α</b>, а её <b>сдвиг по горизонтали</b> (координата x) — это <b>cos α</b>.</li>
+<li>Углы измеряют в градусах и в <b>радианах</b>: 180° = π. Значит, 90° = π/2, 270° = 3π/2, полный оборот 360° = 2π.</li>
+<li>Так работает любой вращающийся вал: высота точки на нём меняется по синусоиде.</li>
+</ul>`,
+    parts: [
+    { type: "explore", title: "Вал на мониторе" },
+    { type: "mc", q: "Чему равен sin 90° (sin π/2)?", opts:["0","1","−1"], c:1, w:"При повороте на 90° точка в самом верху окружности, её высота равна 1."},
+    { type: "mc", q: "Чему равен cos 0°?", opts:["1","0","−1"], c:0, w:"При угле 0° точка справа на оси x: координата x равна 1."},
+    { type: "mc", q: "При каких углах на одном обороте sin α = 0?", opts:["90° и 270° (π/2 и 3π/2)","0°, 180° и 360° (0, π и 2π)","45° и 135° (π/4 и 3π/4)"], c:1, w:"Высота точки равна нулю, когда точка лежит на оси x."},
+    { type: "mc", q: "Через какой угол график синуса начинает повторяться?", opts:["180° (π)","90° (π/2)","360° (2π)"], c:2, w:"После полного оборота точка возвращается на место. Это период синуса: 2π."}
+    ]
+  },
+  { name: "Свойства", min: 8,
+    brief: `<ul>
+<li><b>Период T:</b> функция повторяется через каждые T, то есть f(x + T) = f(x).</li>
+<li><b>Чётная функция:</b> f(−x) = f(x), график симметричен относительно оси y. <b>Нечётная:</b> f(−x) = −f(x), график симметричен относительно начала координат.</li>
+<li><b>tg x = sin x / cos x.</b> На ноль делить нельзя, поэтому тангенс не существует там, где cos x = 0.</li>
+<li>Запись <b>πk</b>, где k — любое целое число, означает «все кратные π»: …, −π, 0, π, 2π, …</li>
+</ul>
+<p>Свойства можно прочитать прямо по графикам:</p>
+<p class="sans small"><b>y = sin x</b></p>${trig(Math.sin)}
+<p class="sans small"><b>y = cos x</b></p>${trig(Math.cos)}
+<p class="sans small"><b>y = tg x</b></p>${trig(Math.tan)}`,
+    parts: [
+    { type: "fill", title: "Заполни карточку свойств",
+      items: [
+        {a:"Область значений y = sin x:", o:["(−∞; +∞)","[−1; 1]","[0; 1]"], c:1, z:""},
+        {a:"Период y = sin x:", o:["2π","π","π/2"], c:0, z:""},
+        {a:"y = sin x — функция", o:["чётная","нечётная","ни чётная, ни нечётная"], c:1, z:""},
+        {a:"y = cos x — функция", o:["чётная","нечётная","ни чётная, ни нечётная"], c:0, z:""},
+        {a:"Нули y = sin x:", o:["x = π/2 + πk","x = πk","x = 2πk"], c:1, z:""},
+        {a:"Нули y = cos x:", o:["x = π/2 + πk","x = πk","x = 2πk"], c:0, z:""},
+        {a:"Область определения y = tg x:", o:["все числа","x ≠ πk","x ≠ π/2 + πk"], c:2, z:""},
+        {a:"Период y = tg x:", o:["2π","π","π/2"], c:1, z:""}
+      ]}
+    ]
+  },
+  { name: "Узнай график", min: 5,
+    brief: `<p>Чтобы быстро узнать график, смотри на три признака:</p>
+<ul>
+<li>Где график пересекает ось y: sin 0 = 0, cos 0 = 1, tg 0 = 0.</li>
+<li>Какой размах значений: у синуса и косинуса от −1 до 1.</li>
+<li>Есть ли разрывы: у тангенса есть, у синуса и косинуса нет.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Подпиши мониторы",
+      prompt: "Какая функция на каждом мониторе? Если график не совпадает ни с одной из трёх, выбери «ни одна».",
+      bins: [{id:"s",label:"y = sin x"},{id:"c",label:"y = cos x"},{id:"t",label:"y = tg x"},{id:"n",label:"ни одна"}],
+      items: [
+        {t:"<b>Монитор A</b>" + trig(Math.cos), b:"c", w:"Проходит через (0; 1) и колеблется от −1 до 1."},
+        {t:"<b>Монитор B</b>" + trig(Math.tan), b:"t", w:"Разрывы и значения от −∞ до +∞."},
+        {t:"<b>Монитор C</b>" + trig(x=>Math.sin(x)+1), b:"n", w:"Похож на синусоиду, но значения от 0 до 2, а не от −1 до 1. Это не y = sin x."},
+        {t:"<b>Монитор D</b>" + trig(Math.sin), b:"s", w:"Проходит через (0; 0), значения от −1 до 1, без разрывов."},
+        {t:"<b>Монитор E</b>" + trig(x=>2*Math.sin(x)), b:"n", w:"Форма синусоиды, но значения от −2 до 2. Это не y = sin x."}
+      ]}
+    ]
+  }
+  ]
+};
+
+/* ---------- урок географии ---------- */
+const geoRef = (rows) => `<div class="refcard"><span class="tag">Справка из атласа</span>${rows.map(([k,v])=>`<div class="rf"><span>${k}</span><b>${v}</b></div>`).join("")}</div>`;
+const GEO_F = {
+  size: {a:"Группа по площади:", o:["гигант (более 3 млн км²)","крупная (1–3 млн км²)","средняя (0,1–1 млн км²)","малая (менее 0,1 млн км²)","микрогосударство (менее 1 тыс. км²)"]},
+  pop:  {a:"По населению:", o:["крупнейшая страна (более 100 млн)","не входит в крупнейшие"]},
+  sea:  {a:"Отношение к морю:", o:["приморская","островная","страна-архипелаг","внутриконтинентальная"]},
+  dev:  {a:"Уровень развития:", o:["развитая","развивающаяся","наименее развитая"]},
+  gov:  {a:"Форма правления:", o:["абсолютная монархия","конституционная монархия","президентская республика","парламентская республика"]},
+  str:  {a:"Устройство:", o:["унитарное","федеративное"]}
+};
+const geoItems = c => ["size","pop","sea","dev","gov","str"].map((k,i)=>({...GEO_F[k], c:c[i], z:""}));
+
+LESSONS.geo3 = {
+  title: "Профиль страны",
+  theme: "brand",
+  ui: { introStamp: "География", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Любую страну можно описать как анкету: размер, население, положение относительно моря, уровень развития, форма правления и устройство. Если такую анкету открыть без названия, страну всё равно можно узнать.</p>
+<p>Сегодня ты будешь читать и собирать профили стран: узнавать страну по характеристикам, заполнять её анкету по справке из атласа, находить ошибки в чужом профиле и разбираться, как живёт страна без выхода к морю.</p>
+<p class="muted small sans">Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Узнай страну", min: 6,
+    brief: `<p>Сейчас перед тобой будут анонимные профили. Характеристики открываются по одной.</p>
+<ul><li>Ответить можно в любой момент. Чем меньше подсказок ты открыл, тем больше баллов: 3 балла после первой подсказки, 2 после второй, 1 после третьей и четвёртой.</li>
+<li>Ответ даётся один раз.</li></ul>`,
+    parts: [
+    { type: "reveal", title: "Анонимные профили",
+      items: [
+        { clues: ["Площадь 2,7 млн км², девятое место в мире", "Выхода к Мировому океану нет. Это самая большая внутриконтинентальная страна мира", "Омывается Каспийским морем, но это бессточное озеро: к океану оно не ведёт", "Соседи: Россия, Китай, Узбекистан, Киргизия, Туркмения"],
+          opts: ["Монголия","Казахстан","Афганистан","Чад"], c: 1 },
+        { clues: ["Население около 280 млн человек, четвёртое место в мире", "Более 17 тысяч островов", "Президентская республика, унитарное государство", "Столицу переносят с острова Ява на остров Калимантан"],
+          opts: ["Филиппины","Япония","Индонезия","Малайзия"], c: 2 },
+        { clues: ["Площадь около 244 тыс. км²", "Островное государство с единственной сухопутной границей", "Конституционная монархия, унитарное государство из четырёх исторических частей", "Столица стоит на реке Темзе"],
+          opts: ["Ирландия","Великобритания","Исландия","Нидерланды"], c: 1 }
+      ]}
+    ]
+  },
+  { name: "Собери профиль", min: 12,
+    brief: `<p>Анкета страны состоит из шести полей. Они <b>заполняются независимо</b>: гигант по площади может быть средним по населению.</p>
+<ul>
+<li><b>Площадь:</b> гиганты — более 3 млн км² (их семь: Россия, Канада, Китай, США, Бразилия, Австралия, Индия), крупные — 1–3 млн, средние — 0,1–1 млн, малые — менее 0,1 млн, микрогосударства — менее 1 тыс. км² (Монако, Сан-Марино).</li>
+<li><b>Население:</b> крупнейшие страны — более 100 млн человек.</li>
+<li><b>Отношение к морю:</b> приморские, островные, страны-архипелаги, внутриконтинентальные (без выхода к Мировому океану).</li>
+<li><b>Уровень развития</b> определяют по ВВП на душу населения и ИЧР (индексу человеческого развития): развитые, развивающиеся, наименее развитые.</li>
+<li><b>Форма правления:</b> монархия (абсолютная, конституционная, теократическая) или республика (президентская, парламентская, смешанная).</li>
+<li><b>Форма устройства:</b> унитарное государство (регионы подчиняются центру) или федерация (у регионов свои законы и органы власти). Правление и устройство не связаны между собой.</li>
+</ul>
+<div class="note"><b>Пример: Канада.</b> 9,98 млн км² — гигант. ≈ 41 млн жителей — не входит в крупнейшие. Омывается тремя океанами — приморская. Очень высокий ИЧР — развитая. Глава государства — британский монарх, власть у парламента и премьер-министра — конституционная монархия. 10 провинций и 3 территории со своими законодательными органами — федерация.</div>`,
+    parts: [
+    { type: "pick", key: "country", title: "Выбери страну", prompt: "Выбери страну, профиль которой будешь собирать.",
+      opts: ["Бразилия","Япония","Индия","Австрия"] },
+    { type: "fill", choiceKey: "country",
+      variants: {
+        "Бразилия": { title: "Профиль: Бразилия", fig: geoRef([["Регион","Южная Америка"],["Площадь","8,5 млн км²"],["Население","≈ 212 млн человек"],["Побережье","омывается Атлантическим океаном"],["ИЧР","≈ 0,79 — высокий"],["ВВП на душу","≈ 10 тыс. $"],["Власть","президент — глава государства и правительства, избирается народом"],["Деление","26 штатов и федеральный округ, у штатов свои конституции и парламенты"]]),
+          items: geoItems([0,0,0,1,2,1]) },
+        "Япония": { title: "Профиль: Япония", fig: geoRef([["Регион","Восточная Азия"],["Площадь","378 тыс. км²"],["Население","≈ 124 млн человек"],["Побережье","4 крупных и около 14 тыс. мелких островов"],["ИЧР","≈ 0,93 — очень высокий"],["ВВП на душу","≈ 33 тыс. $"],["Власть","император — символ государства, реальная власть у парламента и премьер-министра"],["Деление","47 префектур, подчиняются центру"]]),
+          items: geoItems([2,0,[1,2],0,1,0]) },
+        "Индия": { title: "Профиль: Индия", fig: geoRef([["Регион","Южная Азия"],["Площадь","3,29 млн км²"],["Население","≈ 1,45 млрд человек"],["Побережье","омывается Индийским океаном"],["ИЧР","≈ 0,69 — средний"],["ВВП на душу","≈ 2,7 тыс. $"],["Власть","президента выбирает парламент, правительство во главе с премьер-министром отвечает перед парламентом"],["Деление","28 штатов со своими законодательными собраниями и союзные территории"]]),
+          items: geoItems([0,0,0,1,3,1]) },
+        "Австрия": { title: "Профиль: Австрия", fig: geoRef([["Регион","Центральная Европа"],["Площадь","84 тыс. км²"],["Население","≈ 9 млн человек"],["Побережье","выхода к морю нет, 8 сухопутных соседей"],["ИЧР","≈ 0,93 — очень высокий"],["ВВП на душу","≈ 56 тыс. $"],["Власть","президент избирается народом, но реальная власть у парламента и федерального канцлера"],["Деление","9 федеральных земель со своими парламентами"]]),
+          items: geoItems([3,1,3,0,3,1]) }
+      }}
+    ]
+  },
+  { name: "Найди ошибки", min: 7,
+    brief: `<p>Студент по обмену из зарубежного колледжа-партнёра заполнил анкету Австралии и попросил её проверить. В анкете есть ошибки.</p>
+<ul><li>Для каждого поля отметь, верно оно или с ошибкой.</li>
+<li>Для ошибочных полей выбери правильный вариант.</li></ul>
+<p class="small muted">Пригодится: площадь Австралии 7,7 млн км², население ≈ 27 млн. Страна занимает целый материк, ИЧР ≈ 0,95, глава государства — британский монарх, в составе 6 штатов и 2 территории со своими парламентами.</p>`,
+    parts: [
+    { type: "audit", title: "Проверь анкету",
+      author: "Анкету заполнил: Лукас Ферре, студент по обмену, колледж-партнёр (Франция)",
+      country: "Австралия",
+      rows: [
+        {f:"Площадь", v:"7,7 млн км² — страна-гигант", err:false, w:"Верно: больше 3 млн км², Австралия входит в семёрку гигантов."},
+        {f:"Отношение к морю", v:"Внутриконтинентальная страна, выхода к морю не имеет", err:true,
+         o:["Приморская: занимает целый материк и со всех сторон омывается океанами","Страна-архипелаг","Внутриконтинентальная, но с выходом к озёрам"], c:0,
+         w:"Австралия — страна-материк, у неё вообще нет сухопутных границ."},
+        {f:"Уровень развития", v:"Наименее развитая страна с низким ИЧР", err:true,
+         o:["Развивающаяся, средний ИЧР","Развитая, очень высокий ИЧР","Наименее развитая, низкий ИЧР"], c:1,
+         w:"ИЧР ≈ 0,95 — один из самых высоких в мире."},
+        {f:"Форма правления", v:"Президентская республика", err:true,
+         o:["Парламентская республика","Абсолютная монархия","Конституционная монархия"], c:2,
+         w:"Глава государства — британский монарх, власть у парламента и премьер-министра."},
+        {f:"Форма устройства", v:"Унитарное государство", err:true,
+         o:["Федерация","Унитарное государство"], c:0,
+         w:"6 штатов и 2 территории со своими парламентами. Монархия и федерация спокойно сочетаются, как и у Канады."}
+      ]}
+    ]
+  },
+  { name: "Анонимные анкеты", min: 7,
+    brief: `<ul>
+<li><b>Абсолютная монархия:</b> вся власть у монарха, парламента нет или он только совещательный. Если власть монарха опирается на религию, монархию называют <b>теократической</b>.</li>
+<li><b>Конституционная монархия:</b> монарх есть, но его власть ограничена конституцией и парламентом.</li>
+<li><b>Президентская республика:</b> президент избирается народом и сам возглавляет правительство.</li>
+<li><b>Парламентская республика:</b> правительство формирует парламент, роль президента невелика.</li>
+<li><b>Унитарное государство:</b> регионы равны и подчиняются центру, законы принимаются в столице. <b>Федерация:</b> у регионов свои законы и органы власти.</li>
+</ul>`,
+    parts: [
+    { type: "fill", title: "Описание 1", fig: `<div class="note">Глава государства — король, его власть ограничена конституцией и парламентом. Страна делится на области с одинаковыми правами, все законы принимаются в столице.</div><p></p>`,
+      items: [
+        {a:"Форма правления:", o:["абсолютная монархия","конституционная монархия","президентская республика","парламентская республика"], c:1, z:""},
+        {a:"Устройство:", o:["унитарное","федеративное"], c:0, z:""},
+        {a:"Подходит страна:", o:["США","Германия","Швеция","Саудовская Аравия"], c:2, z:""}
+      ]},
+    { type: "fill", title: "Описание 2", fig: `<div class="note">Президент — одновременно глава государства и правительства, избирается населением. Страна состоит из штатов, у каждого свои законы и свой парламент.</div><p></p>`,
+      items: [
+        {a:"Форма правления:", o:["абсолютная монархия","конституционная монархия","президентская республика","парламентская республика"], c:2, z:""},
+        {a:"Устройство:", o:["унитарное","федеративное"], c:1, z:""},
+        {a:"Подходит страна:", o:["Франция","США","Великобритания","Китай"], c:1, z:""}
+      ]},
+    { type: "fill", title: "Описание 3", fig: `<div class="note">Вся полнота власти у монарха, законодательство опирается на религиозные нормы. Самостоятельных полномочий у регионов нет.</div><p></p>`,
+      items: [
+        {a:"Форма правления:", o:["абсолютная (теократическая) монархия","конституционная монархия","президентская республика","парламентская республика"], c:0, z:""},
+        {a:"Устройство:", o:["унитарное","федеративное"], c:0, z:""},
+        {a:"Подходит страна:", o:["Норвегия","Индия","Саудовская Аравия","Япония"], c:2, z:""}
+      ]}
+    ]
+  },
+  { name: "Страна без моря", min: 10,
+    brief: `<ul>
+<li><b>Политико-географическое положение (ПГП)</b> — расположение страны относительно других государств, союзов, конфликтов и транспортных путей.</li>
+<li>У внутриконтинентальной страны все грузы к морю идут через соседей, поэтому ей особенно важны отношения с ними, транзитные договоры, железные дороги и реки.</li>
+<li>ПГП может улучшиться или ухудшиться <b>без изменения границ</b>: достаточно, чтобы поменялись отношения с соседями или появились новые маршруты.</li>
+</ul>`,
+    parts: [
+    { type: "pick", key: "pgp", title: "Выбери страну", prompt: "Обе страны не имеют выхода к Мировому океану. С какой будешь работать?", opts: ["Монголия","Боливия"] },
+    { type: "classify", choiceKey: "pgp",
+      bins: [{id:"lim",label:"Ограничение"},{id:"comp",label:"Компенсация"},{id:"no",label:"Не про ПГП"}],
+      variants: {
+        "Монголия": { title: "Монголия: ограничения и компенсации", prompt: "Монголия зажата между двумя соседями — Россией и Китаем. Разложи утверждения: что ограничивает страну, чем она это компенсирует, а что к ПГП не относится.",
+          items: [
+            {t:"Все грузы к морю идут через территорию России или Китая", b:"lim", w:"Других соседей у Монголии нет, весь транзит зависит от них."},
+            {t:"Путь до ближайшего морского порта — больше тысячи километров, перевозки дорожают", b:"lim", w:"Удалённость от моря делает экспорт дороже."},
+            {t:"Экспорт угля и меди сильно зависит от Китая — главного покупателя и транзитёра", b:"lim", w:"Зависимость от одного соседа — типичная слабость ПГП."},
+            {t:"По договорённости с Китаем монгольские грузы идут к морю через порт Тяньцзинь", b:"comp", w:"Транзитный договор заменяет собственный порт."},
+            {t:"Трансмонгольская железная дорога связывает страну с Россией и Китаем", b:"comp", w:"Маршрут, который соединяет её с соседями и дальше с портами."},
+            {t:"Политика «третьего соседа»: связи с Японией, Южной Кореей, ЕС и США", b:"comp", w:"Так Монголия снижает зависимость от двух соседей."},
+            {t:"Климат резко континентальный, с очень холодной зимой", b:"no", w:"Это природные условия, а не положение относительно других стран."},
+            {t:"Столица страны — Улан-Батор", b:"no", w:"Просто факт, на ПГП он не влияет."}
+          ]},
+        "Боливия": { title: "Боливия: ограничения и компенсации", prompt: "Боливия окружена пятью соседями и не имеет выхода к океану. Разложи утверждения: что ограничивает страну, чем она это компенсирует, а что к ПГП не относится.",
+          items: [
+            {t:"Выход к Тихому океану Боливия потеряла после войны с Чили в XIX веке", b:"lim", w:"С тех пор страна внутриконтинентальная."},
+            {t:"Экспорт идёт через порты соседей: это дороже и зависит от их политики", b:"lim", w:"Типичное ограничение страны без моря."},
+            {t:"Многолетний спор с Чили о выходе к морю осложняет отношения двух стран", b:"lim", w:"Конфликт с соседом ухудшает ПГП."},
+            {t:"Договор с Чили даёт право свободного транзита грузов через чилийские порты", b:"comp", w:"Договорённость частично заменяет собственный порт."},
+            {t:"Перу выделило Боливии зону в своём порту Ило", b:"comp", w:"Ещё один выход к Тихому океану через соседа."},
+            {t:"Выход к Атлантике по рекам Парагвай и Парана", b:"comp", w:"Речной путь — альтернатива тихоокеанским портам."},
+            {t:"Ла-Пас — одна из самых высокогорных столиц мира", b:"no", w:"Это особенность рельефа, а не положения среди стран."},
+            {t:"В стране распространены индейские языки — кечуа и аймара", b:"no", w:"Культурная особенность, к ПГП не относится."}
+          ]}
+      }},
+    { type: "text", choiceKey: "pgp", min: 150,
+      variants: {
+        "Монголия": { title: "Короткое рассуждение", prompt: "Может ли политико-географическое положение Монголии улучшиться без изменения границ? Объясни в 3–4 предложениях. Опирайся на конкретику: соседей, маршруты, договорённости." },
+        "Боливия": { title: "Короткое рассуждение", prompt: "Может ли политико-географическое положение Боливии улучшиться без изменения границ? Объясни в 3–4 предложениях. Опирайся на конкретику: соседей, маршруты, договорённости." }
+      }}
+    ]
+  }
+  ]
+};
+
+/* ===================== ДВИЖОК ===================== */
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const KEY = "cab_" + CONFIG.GROUPS.join("_");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const load = k => { try { return JSON.parse(localStorage.getItem(KEY + k)) } catch(e) { return null } };
+const save = (k, v) => { try { localStorage.setItem(KEY + k, JSON.stringify(v)) } catch(e) {} };
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
+
+/* время: берём с сервера, если не вышло — с устройства */
+let clockShift = 0;
+async function syncClock(){
+  try {
+    const r = await fetch(location.href.split("#")[0], {method:"HEAD", cache:"no-store"});
+    const d = r.headers.get("Date");
+    if (d) clockShift = new Date(d).getTime() - Date.now();
+  } catch(e) {}
+}
+const now = () => Date.now() + clockShift;
+function mskTime(hm){ // момент начала по Москве (UTC+3)
+  if (!hm) return null;
+  const [y,m,d] = CONFIG.DATE.split("-").map(Number); const [h,mi] = hm.split(":").map(Number);
+  return Date.UTC(y, m-1, d, h-3, mi);
+}
+const localHM = t => new Date(t).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+
+function partMax(p){
+  if (p.variants) p = {...p, ...Object.values(p.variants)[0]};
+  if (p.type === "reveal") return p.items.length * 3;
+  if (p.type === "truth") return 1 << p.vars.length;
+  if (p.type === "dnf") return 2;
+  if (p.type === "grid") return p.rows.length * p.cols.length;
+  if (p.type === "budget") return p.risks.length + p.bonus;
+  if (p.type === "audit") return p.rows.length + p.rows.filter(r => r.err).length;
+  if (p.type === "classify" || p.type === "order" || p.type === "fill") return p.items.length;
+  if (p.type === "dialog") return p.rounds.length * 3;
+  if (p.type === "mc") return 1;
+  return 0;
+}
+const stageMax = s => s.parts.reduce((a,p) => a + partMax(p), 0);
+const lessonMax = L => L.stages.reduce((a,s) => a + stageMax(s), 0);
+
+function hash(str){ let h = 2166136261; for (const c of str){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) } return (h >>> 0).toString(36).toUpperCase().padStart(6,"0").slice(-6) }
+
+/* ---------- главная ---------- */
+function home(){
+  document.body.className = "brand"; document.documentElement.style.background = "#F4F5F7";
+  const prof = load("profile");
+  let html = `<div class="card folder">
+    <span class="tag">${esc(CONFIG.SUBTITLE)}</span>
+    <h1>${esc(CONFIG.TITLE).replace(/(\d)-(\d)/g,"$1\u2011$2")}</h1>
+    <p class="muted sans small">Расписание на ${new Date(CONFIG.DATE+"T12:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"})} · время московское</p>`;
+  if (!prof){
+    html += `<label for="nm">Фамилия и имя — как на платформе</label>
+      <input type="text" id="nm" placeholder="Иванов Иван" autocomplete="name">
+      <label for="gr">Группа</label>
+      <select id="gr"><option value="">Выбери группу</option>${CONFIG.GROUPS.map(g=>`<option>${g}</option>`).join("")}</select>
+      <p style="margin-top:14px"><button class="btn" id="go" disabled>Войти в кабинет</button></p></div>`;
+    app.innerHTML = html;
+    const chk = () => $("#go").disabled = !($("#nm").value.trim().split(/\s+/).length >= 2 && $("#gr").value);
+    $("#nm").oninput = chk; $("#gr").onchange = chk;
+    $("#go").onclick = () => { save("profile", {name: $("#nm").value.trim().replace(/\s+/g," "), group: $("#gr").value}); home(); };
+    return;
+  }
+  html += `<div class="row sans small"><span><b>${esc(prof.name)}</b> · группа ${esc(prof.group)}</span>
+    <button class="link" id="chg">это не я</button></div></div>`;
+  const t = now();
+  SCHEDULE.forEach(s => {
+    const st = mskTime(s.start), en = mskTime(s.end);
+    const done = load("res_" + s.id);
+    let status = "", cls = "", open = !s.soon;
+    if (s.soon){ status = `<span class="status lock">готовится</span>`; }
+    else if (done){ status = `<span class="status done">сдано</span>`; }
+    else if (CONFIG.TIME_LOCK && st && t < st){ open = false; cls = "dis"; status = `<span class="status lock">откроется в ${s.start}</span>`; }
+    else if (st && en && t >= st && t <= en){ cls = "now"; status = `<span class="status now">идёт сейчас</span>`; }
+    else { status = `<span class="status">открыт</span>`; }
+    if (!open) cls = "dis";
+    const localNote = st && localHM(st) !== s.start ? `<small>у тебя ${localHM(st)}</small>` : "";
+    html += `<div class="card lesson ${cls}" data-id="${s.id}" data-open="${open?1:0}">
+      <div class="time">${s.start || "—"}${s.end ? "–"+s.end : ""}${localNote}</div>
+      <div class="body"><span class="tag">${esc(s.subject)}</span><h3>${esc(s.title)}</h3>${s.note?`<p class="muted small" style="margin:0">${esc(s.note)}</p>`:""}</div>
+      <div>${status}</div></div>`;
+  });
+  if (CONFIG.TEST_MODE) html += `<p style="text-align:center"><button class="link sans small" id="rst">Сбросить прогресс (режим проверки)</button></p>`;
+  app.innerHTML = html;
+  if ($("#rst")) $("#rst").onclick = resetAll;
+  $("#chg").onclick = () => { if (confirmBox()) { try{ localStorage.removeItem(KEY+"profile") }catch(e){} home(); } };
+  document.querySelectorAll(".lesson").forEach(el => el.onclick = () => { if (el.dataset.open === "1") openLesson(el.dataset.id) });
+}
+function confirmBox(){ return true }
+
+/* ---------- урок ---------- */
+let L, LID, S;
+function openLesson(id){
+  LID = id; L = LESSONS[id];
+  document.body.className = L.theme || ""; document.documentElement.style.background = L.theme === "brand" ? "#F4F5F7" : "";
+  S = load("ls_" + id) || {stage: -1, scores: [], answer: ""};
+  const res = load("res_" + id);
+  if (res) return results();
+  if (S.stage < 0) return intro();
+  stageBrief();
+}
+const DEF_UI = { introStamp: "Дело", start: "Открыть дело", brief: "Материалы дела", doneStamp: "Дело закрыто", submit: "Сдать дело" };
+const ui = k => (L.ui && L.ui[k]) || DEF_UI[k];
+function persist(){ save("ls_" + LID, S) }
+function total(){ return S.scores.reduce((a,b)=>a+(b||0),0) }
+function header(){
+  const steps = L.stages.map((_,i)=>`<i class="${i < S.stage ? "on" : i === S.stage ? "cur" : ""}"></i>`).join("");
+  return `<div class="top"><button class="link" id="back">← В кабинет</button><span class="pts">${total()} баллов</span></div><div class="steps">${steps}</div>`;
+}
+function bindBack(){ $("#back").onclick = () => { LID = null; home(); } }
+function intro(){
+  app.innerHTML = `<div class="top"><button class="link" id="back">← В кабинет</button></div>
+  <div class="card folder"><span class="stamp">${ui("introStamp")}</span><h1 style="margin-top:12px">${esc(L.title)}</h1>${L.intro}
+  <p class="sans small"><b>Этапы:</b> ${L.stages.map((s,i)=>`${i+1}. ${s.name} (${s.min} мин)`).join(" · ")}</p>
+  <button class="btn red" id="start">${ui("start")}</button></div>`;
+  bindBack();
+  $("#start").onclick = () => { S.stage = 0; persist(); stageBrief(); };
+}
+function stageBrief(){
+  if (S.stage >= L.stages.length) return finish();
+  const st = L.stages[S.stage];
+  app.innerHTML = header() + `<div class="card ${L.theme === "brand" ? "" : "folder"} brief"><span class="tag">${ui("brief")} · часть ${S.stage+1} из ${L.stages.length} · ≈${st.min} мин</span><h2>${esc(st.name)}</h2>${st.brief}
+  <button class="btn" id="go">К заданию →</button></div>`;
+  bindBack(); scrollTo(0,0);
+  let pts = 0, pi = 0;
+  $("#go").onclick = () => nextPart();
+  function nextPart(){
+    if (pi >= st.parts.length){ S.scores[S.stage] = pts; S.stage++; persist(); return stageBrief(); }
+    let p = st.parts[pi++];
+    if (p.variants) p = {...p, ...p.variants[(S.choice || {})[p.choiceKey]]};
+    app.innerHTML = header() + `<div class="card" id="pc"></div>`;
+    bindBack(); scrollTo(0,0);
+    RENDER[p.type](p, $("#pc"), got => { pts += got; nextPart(); });
+  }
+}
+
+/* ---------- типы заданий ---------- */
+const RENDER = {
+classify(p, el, done){
+  const items = shuffle(p.items.map((x,i)=>({...x,i})));
+  const pick = {};
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+   ${items.map(x=>`<div class="item" data-i="${x.i}"><div>${x.t}</div><div class="chips">${p.bins.map(b=>`<button class="chip" data-b="${b.id}">${b.label}</button>`).join("")}</div><div class="why"></div></div>`).join("")}
+   <div id="aft"></div><button class="btn" id="ck" disabled>Проверить</button>`;
+  el.querySelectorAll(".item").forEach(it => it.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    pick[it.dataset.i] = c.dataset.b;
+    it.querySelectorAll(".chip").forEach(z => z.classList.toggle("on", z === c));
+    $("#ck").disabled = Object.keys(pick).length < p.items.length;
+  }));
+  $("#ck").onclick = () => {
+    let got = 0; el.classList.add("checked");
+    el.querySelectorAll(".item").forEach(it => {
+      const x = p.items[it.dataset.i], ok = pick[it.dataset.i] === x.b;
+      if (ok) got++;
+      it.classList.add(ok ? "ok" : "bad");
+      it.querySelectorAll(".chip").forEach(z => z.disabled = true);
+      it.querySelector(".why").innerHTML = (ok ? "<b>Верно.</b> " : `<b>Правильно: ${p.bins.find(b=>b.id===x.b).label}.</b> `) + x.w;
+    });
+    $("#aft").innerHTML = `<p class="sans"><b>${got} из ${p.items.length}</b></p>` + (p.after || "");
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+mc(p, el, done){
+  el.innerHTML = `<span class="tag">Вопрос</span>${p.fig || ""}<h3>${p.q}</h3>${p.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}<div id="w"></div>`;
+  el.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+    const i = +b.dataset.i, ok = i === p.c;
+    el.querySelectorAll(".opt").forEach(z => { z.disabled = true; if (+z.dataset.i === p.c) z.classList.add("ok") });
+    if (!ok) b.classList.add("bad");
+    $("#w").innerHTML = `<p>${ok ? "<b>Верно.</b> " : "<b>Не совсем.</b> "}${p.w}</p><button class="btn" id="nx">Дальше →</button>`;
+    $("#nx").onclick = () => done(ok ? 1 : 0);
+  });
+},
+order(p, el, done){
+  let cur = shuffle(p.items.map((t,i)=>i));
+  while (cur.every((v,i)=>v===i)) cur = shuffle(cur);
+  let checked = false;
+  const draw = () => {
+    el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+    ${cur.map((v,k)=>`<div class="item ord ${checked ? (v===k?"ok":"bad") : ""}"><span class="n">${k+1}</span><span class="t">${p.items[v]}</span>${checked?"":`<span class="mv"><button data-k="${k}" data-d="-1" aria-label="выше">↑</button><button data-k="${k}" data-d="1" aria-label="ниже">↓</button></span>`}</div>`).join("")}
+    <div id="w"></div><button class="btn" id="ck">${checked ? "Дальше →" : "Проверить"}</button>`;
+    el.querySelectorAll(".mv button").forEach(b => b.onclick = () => {
+      const k = +b.dataset.k, j = k + +b.dataset.d; if (j < 0 || j >= cur.length) return;
+      [cur[k], cur[j]] = [cur[j], cur[k]]; draw();
+    });
+    const got = cur.filter((v,k)=>v===k).length;
+    if (checked) $("#w").innerHTML = `<p class="sans"><b>На своём месте: ${got} из ${p.items.length}</b></p>` + (got < p.items.length ? `<div class="note"><b>Правильный порядок:</b><ol style="margin:6px 0 0;padding-left:20px">${p.items.map(t=>`<li>${t}</li>`).join("")}</ol></div><p></p>` : "");
+    $("#ck").onclick = () => { if (checked) return done(got); checked = true; draw(); };
+  };
+  draw();
+},
+fill(p, el, done){
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2>${p.fig || ""}
+  ${p.items.map((x,i)=>`<div class="fill item" data-i="${i}">${x.a} <select><option value="">…</option>${x.o.map((o,j)=>`<option value="${j}">${o}</option>`).join("")}</select>${x.z}<div class="why"></div></div>`).join("")}
+  <button class="btn" id="ck" disabled>Проверить</button>`;
+  const sels = [...el.querySelectorAll("select")];
+  sels.forEach(s => s.onchange = () => $("#ck").disabled = sels.some(z => z.value === ""));
+  $("#ck").onclick = () => {
+    let got = 0; el.classList.add("checked");
+    el.querySelectorAll(".fill").forEach(f => {
+      const x = p.items[f.dataset.i], s = f.querySelector("select"), ok = [].concat(x.c).includes(+s.value);
+      if (ok) got++; s.disabled = true; f.classList.add(ok ? "ok" : "bad");
+      f.querySelector(".why").innerHTML = ok ? "<b>Верно.</b>" : `<b>Правильно: ${[].concat(x.c).map(j => x.o[j]).join(" или ")}.</b>`;
+    });
+    const b = $("#ck"); b.textContent = `${got} из ${p.items.length} · Дальше →`; b.onclick = () => done(got);
+  };
+},
+dialog(p, el, done){
+  let r = 0, got = 0, conf = 100;
+  const step = 100 / (p.rounds.length * 3);
+  el.innerHTML = `<span class="tag">Допрос</span><h2>${p.title}</h2><p>${p.lead}</p>
+   <div class="meter">Уверенность Раскольникова в теории<div class="bar"><b id="cf" style="width:100%"></b></div></div>
+   <div class="chat" id="chat"></div><div id="ops"></div>`;
+  const chat = $("#chat");
+  const say = (cls, who, t) => { chat.insertAdjacentHTML("beforeend", `<div class="msg ${cls}"><span class="who">${who}</span>${t}</div>`); };
+  const round = () => {
+    if (r >= p.rounds.length){
+      $("#ops").innerHTML = p.finale + `<p class="sans" style="margin-top:12px"><b>${got} из ${p.rounds.length*3}</b></p><button class="btn" id="nx">Дальше →</button>`;
+      $("#nx").onclick = () => done(got); return;
+    }
+    const R = p.rounds[r];
+    say(R.who === "p" ? "p" : "r", R.who === "p" ? "Порфирий" : "Раскольников", R.line);
+    $("#ops").innerHTML = shuffle(R.opts.map((o,i)=>({...o,i}))).map(o=>`<button class="opt" data-i="${o.i}">${o.t}</button>`).join("");
+    $("#ops").querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      const o = R.opts[b.dataset.i]; got += o.p; conf -= o.p * step;
+      say("me", "Ты", o.t);
+      if (R.who !== "p") say("r", "Раскольников", o.r);
+      say("p", "Порфирий", o.n);
+      $("#cf").style.width = Math.max(0, conf) + "%";
+      r++;
+      $("#ops").innerHTML = `<button class="btn" id="nx">${r < p.rounds.length ? "Следующий вопрос →" : "Итог допроса →"}</button>`;
+      $("#nx").onclick = () => { $("#ops").innerHTML = ""; round(); };
+      $("#nx").scrollIntoView({behavior:"smooth", block:"center"});
+    });
+  };
+  round();
+},
+explore(p, el, done){
+  const modes = [
+    {k:"sin", f:Math.sin, lead:"Двигай ползунок. Точка вала поворачивается, а справа рисуется её <b>высота</b> — это синус угла. Прокрути полный оборот, до 360°."},
+    {k:"cos", f:Math.cos, lead:"Теперь справа рисуется <b>сдвиг точки по горизонтали</b> — это косинус угла. Снова прокрути полный оборот."}
+  ];
+  let m = 0, a = 0, maxA = 0;
+  const gcd = (x,y) => y ? gcd(y, x % y) : x;
+  const radStr = d => { if (!d) return "0"; const g = gcd(d,180), n = d/g, q = 180/g; return (n === 1 ? "" : n) + "π" + (q === 1 ? "" : "/" + q) };
+  el.innerHTML = `<span class="tag">Интерактив</span><h2>${p.title}</h2><p id="lead"></p><div id="fig"></div>
+    <input type="range" id="ang" min="0" max="360" step="15" value="0" style="width:100%;accent-color:#3b67d6" aria-label="Угол поворота">
+    <p class="sans" id="rd"></p><button class="btn" id="nx" disabled>Прокрути до 360°</button>`;
+  const draw = () => {
+    const M = modes[m], r = 80, cx = 105, cy = 115, g0 = 235, g1 = 620, sx = (g1 - g0) / 360;
+    const rad = a * Math.PI / 180, px = cx + r * Math.cos(rad), py = cy - r * Math.sin(rad);
+    let path = ""; for (let d = 0; d <= maxA; d += 3) path += (d ? "L" : "M") + (g0 + d*sx).toFixed(1) + " " + (cy - r*M.f(d*Math.PI/180)).toFixed(1);
+    const gx = g0 + a*sx, gy = cy - r*M.f(rad);
+    let s = `<svg viewBox="0 0 640 245" style="width:100%;height:auto;display:block;background:#fff;border:1px solid #e2e4e9;border-radius:12px">`;
+    s += `<line x1="15" x2="195" y1="${cy}" y2="${cy}" stroke="#9aa0aa"/><line x1="${cx}" x2="${cx}" y1="25" y2="205" stroke="#9aa0aa"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#c9ced8" stroke-width="2"/>`;
+    s += `<line x1="${cx}" y1="${cy}" x2="${px}" y2="${py}" stroke="#222" stroke-width="1.5"/>`;
+    if (m === 0) s += `<line x1="${px}" y1="${cy}" x2="${px}" y2="${py}" stroke="#3b67d6" stroke-width="5" stroke-linecap="round"/><line x1="${px}" y1="${py}" x2="${gx}" y2="${gy}" stroke="#3b67d6" stroke-dasharray="4 4"/>`;
+    else s += `<line x1="${cx}" y1="${py}" x2="${px}" y2="${py}" stroke="#3b67d6" stroke-width="5" stroke-linecap="round"/>`;
+    s += `<circle cx="${px}" cy="${py}" r="6" fill="#222"/>`;
+    s += `<line x1="${g0}" x2="${g1}" y1="${cy}" y2="${cy}" stroke="#9aa0aa"/><line x1="${g0}" x2="${g0}" y1="25" y2="205" stroke="#9aa0aa"/>`;
+    [[cy-r,"1"],[cy+r,"−1"]].forEach(([y,l]) => s += `<line x1="${g0}" x2="${g1}" y1="${y}" y2="${y}" stroke="#eceef2"/><text x="${g0-6}" y="${y+4}" font-size="12" text-anchor="end" fill="#5f636b" font-family="sans-serif">${l}</text>`);
+    [90,180,270,360].forEach(d => s += `<line x1="${g0+d*sx}" x2="${g0+d*sx}" y1="25" y2="205" stroke="#eceef2"/><text x="${g0+d*sx}" y="222" font-size="11" text-anchor="middle" fill="#5f636b" font-family="sans-serif">${d}°</text><text x="${g0+d*sx}" y="237" font-size="11" text-anchor="middle" fill="#5f636b" font-family="sans-serif">${radStr(d)}</text>`);
+    s += `<path d="${path}" fill="none" stroke="#3b67d6" stroke-width="3"/><circle cx="${gx}" cy="${gy}" r="5" fill="#3b67d6"/></svg>`;
+    $("#fig").innerHTML = s;
+    let v = M.f(rad); if (Math.abs(v) < 0.005) v = 0;
+    $("#rd").innerHTML = `Угол <b>${a}° = ${radStr(a)}</b> · ${M.k} = <b>${v.toFixed(2).replace("-","−")}</b>`;
+    $("#lead").innerHTML = M.lead;
+  };
+  $("#ang").oninput = e => {
+    a = +e.target.value; maxA = Math.max(maxA, a); draw();
+    if (maxA >= 360){ const b = $("#nx"); b.disabled = false; b.textContent = m === 0 ? "Теперь косинус →" : "Дальше →"; }
+  };
+  $("#nx").onclick = () => {
+    if (m === 0){ m = 1; a = 0; maxA = 0; $("#ang").value = 0; $("#nx").disabled = true; $("#nx").textContent = "Прокрути до 360°"; draw(); scrollTo(0,0); }
+    else done(0);
+  };
+  draw();
+},
+pick(p, el, done){
+  el.innerHTML = `<span class="tag">Выбор</span><h2>${p.title}</h2><p>${p.prompt}</p>${p.opts.map(o=>`<button class="opt" data-v="${esc(o)}">${o}</button>`).join("")}`;
+  el.querySelectorAll(".opt").forEach(b => b.onclick = () => { S.choice = S.choice || {}; S.choice[p.key] = b.dataset.v; persist(); done(0); });
+},
+reveal(p, el, done){
+  let k = 0, got = 0;
+  const one = () => {
+    if (k >= p.items.length) return done(got);
+    const it = p.items[k]; let open = 1, answered = false;
+    const draw = () => {
+      el.innerHTML = `<span class="tag">Профиль ${k+1} из ${p.items.length}</span><h2>${p.title}</h2>
+      <div class="refcard"><div class="avatar">?</div>${it.clues.map((c,i)=>`<div class="rf ${i<open?"":"hid"}"><span>Подсказка ${i+1}</span><b>${i<open?c:"скрыто"}</b></div>`).join("")}</div>
+      ${answered ? "" : (open < it.clues.length ? `<p><button class="btn ghost" id="more">Открыть подсказку (сейчас за ответ ${Math.max(1,4-open)} б.)</button></p>` : "")}
+      <p class="sans small"><b>Что это за страна?</b></p>
+      ${it.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join("")}<div id="w"></div>`;
+      if ($("#more")) $("#more").onclick = () => { open++; draw(); };
+      el.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+        const ok = +b.dataset.i === it.c, pts = ok ? Math.max(1, 4 - open) : 0; got += pts; answered = true; open = it.clues.length;
+        draw();
+        el.querySelectorAll(".opt").forEach(z => { z.disabled = true; if (+z.dataset.i === it.c) z.classList.add("ok"); else if (z.dataset.i === b.dataset.i) z.classList.add("bad") });
+        $("#w").innerHTML = `<p class="sans"><b>${ok ? `Верно, +${pts}` : "Не угадал"}.</b> Это ${it.opts[it.c]}.</p><button class="btn" id="nx">${k+1 < p.items.length ? "Следующий профиль →" : "Дальше →"}</button>`;
+        $("#nx").onclick = () => { k++; scrollTo(0,0); one(); };
+      });
+    };
+    draw();
+  };
+  one();
+},
+audit(p, el, done){
+  const st = {};
+  el.innerHTML = `<span class="tag">Проверка</span><h2>${p.title}</h2>
+  <div class="refcard"><div class="sans small muted" style="margin-bottom:8px">${p.author}</div><h3>${p.country}</h3>
+  ${p.rows.map((r,i)=>`<div class="item" data-i="${i}"><div class="sans small muted">${r.f}</div><div>${r.v}</div>
+    <div class="chips"><button class="chip" data-j="ok">Верно</button><button class="chip" data-j="err">Ошибка</button></div>
+    <div class="fx" style="display:none;margin-top:8px">${r.o ? `<select><option value="">Правильный вариант…</option>${r.o.map((o,j)=>`<option value="${j}">${o}</option>`).join("")}</select>` : ""}</div>
+    <div class="why"></div></div>`).join("")}</div>
+  <button class="btn" id="ck" disabled>Проверить</button>`;
+  const ready = () => $("#ck").disabled = !p.rows.every((r,i) => st[i] === "ok" || (st[i] === "err" && (!r.o || el.querySelector(`.item[data-i="${i}"] select`).value !== "")));
+  el.querySelectorAll(".item").forEach(it => {
+    const i = it.dataset.i;
+    it.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+      st[i] = c.dataset.j; it.querySelectorAll(".chip").forEach(z => z.classList.toggle("on", z === c));
+      it.querySelector(".fx").style.display = st[i] === "err" ? "block" : "none"; ready();
+    });
+    if (it.querySelector("select")) it.querySelector("select").onchange = ready;
+  });
+  $("#ck").onclick = () => {
+    let got = 0; el.classList.add("checked");
+    p.rows.forEach((r,i) => {
+      const it = el.querySelector(`.item[data-i="${i}"]`), sel = it.querySelector("select");
+      const judged = (st[i] === "err") === r.err; if (judged) got++;
+      let fixed = true; if (r.err){ fixed = judged && +sel.value === r.c; if (fixed) got++; }
+      it.classList.add(judged && fixed ? "ok" : "bad");
+      it.querySelectorAll(".chip,select").forEach(z => z.disabled = true);
+      it.querySelector(".why").innerHTML = (r.err ? `<b>Ошибка. Правильно: ${r.o[r.c]}.</b> ` : "<b>Поле заполнено верно.</b> ") + r.w;
+    });
+    const b = $("#ck"); b.textContent = `${got} из ${partMax(p)} · Дальше →`; b.onclick = () => done(got);
+  };
+},
+truth(p, el, done){
+  const n = p.vars.length, rows = [...Array(1<<n)].map((_,r)=>[...Array(n)].map((_,j)=>(r>>(n-1-j))&1));
+  const val = rows.map(() => null);
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <table class="tt"><tr>${p.vars.map(v=>`<th>${v}</th>`).join("")}<th>f</th></tr>
+  ${rows.map((r,i)=>`<tr data-i="${i}">${r.map(b=>`<td>${b}</td>`).join("")}<td><button class="bit" data-i="${i}">?</button></td></tr>`).join("")}</table>
+  <div id="w"></div><button class="btn" id="ck" disabled>Проверить</button>`;
+  el.querySelectorAll(".bit").forEach(b => b.onclick = () => {
+    const i = +b.dataset.i; val[i] = val[i] === 1 ? 0 : 1; b.textContent = val[i]; b.classList.toggle("one", val[i] === 1);
+    $("#ck").disabled = val.some(v => v === null);
+  });
+  $("#ck").onclick = () => {
+    let got = 0;
+    rows.forEach((r,i) => { const ok = val[i] === p.f(r); if (ok) got++; const tr = el.querySelector(`tr[data-i="${i}"]`); tr.classList.add(ok ? "ok" : "bad"); if (!ok) tr.lastChild.insertAdjacentHTML("beforeend", ` <small>→ ${p.f(r)}</small>`); });
+    el.querySelectorAll(".bit").forEach(z => z.disabled = true);
+    $("#w").innerHTML = `<p class="sans"><b>${got} из ${rows.length}</b></p>${p.after || ""}`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+dnf(p, el, done){
+  const n = p.vars.length, rows = [...Array(1<<n)].map((_,r)=>[...Array(n)].map((_,j)=>(r>>(n-1-j))&1));
+  const want = p.mode === "sdnf" ? 1 : 0, sel = new Set();
+  const term = r => p.mode === "sdnf"
+    ? r.map((b,j)=> b ? p.vars[j] : "¬"+p.vars[j]).join("∧")
+    : "(" + r.map((b,j)=> b ? "¬"+p.vars[j] : p.vars[j]).join("∨") + ")";
+  const formula = () => [...sel].sort((a,b)=>a-b).map(i=>term(rows[i])).join(p.mode === "sdnf" ? " ∨ " : " ∧ ") || "…";
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <table class="tt">${"<tr>"+p.vars.map(v=>`<th>${v}</th>`).join("")+"<th>f</th><th></th></tr>"}
+  ${rows.map((r,i)=>`<tr data-i="${i}" class="pickrow">${r.map(b=>`<td>${b}</td>`).join("")}<td><b>${p.f(r)}</b></td><td class="mk"></td></tr>`).join("")}</table>
+  <p class="sans small muted">Формула:</p><div class="codebox" id="fm">…</div><p></p>
+  <div id="w"></div><button class="btn" id="ck" disabled>Проверить</button>`;
+  el.querySelectorAll(".pickrow").forEach(tr => tr.onclick = () => {
+    if (el.classList.contains("checked")) return;
+    const i = +tr.dataset.i; sel.has(i) ? sel.delete(i) : sel.add(i);
+    tr.classList.toggle("sel", sel.has(i)); tr.querySelector(".mk").textContent = sel.has(i) ? "✓" : "";
+    $("#fm").textContent = formula(); $("#ck").disabled = sel.size === 0;
+  });
+  $("#ck").onclick = () => {
+    el.classList.add("checked");
+    const right = rows.map((r,i)=>i).filter(i => p.f(rows[i]) === want);
+    const ok = right.length === sel.size && right.every(i => sel.has(i)), got = ok ? 2 : 0;
+    sel.clear(); right.forEach(i => sel.add(i));
+    $("#w").innerHTML = ok ? `<div class="note"><b>Верно, +2.</b> ${p.why}</div><p></p>` : `<div class="note"><b>Не совсем.</b> ${p.why}<br><b>Правильно:</b> ${formula()}</div><p></p>`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+grid(p, el, done){
+  const v = p.rows.map(r => r.vals.map(() => false));
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div style="overflow-x:auto"><table class="tt grid"><tr><th></th>${p.cols.map(c=>`<th>${c}</th>`).join("")}</tr>
+  ${p.rows.map((r,i)=>`<tr><th>${r.name}</th>${r.vals.map((_,j)=>`<td><button class="cell" data-i="${i}" data-j="${j}"></button></td>`).join("")}</tr>`).join("")}</table></div>
+  <div id="w"></div><button class="btn" id="ck">Проверить</button>`;
+  el.querySelectorAll(".cell").forEach(c => c.onclick = () => { const i = +c.dataset.i, j = +c.dataset.j; v[i][j] = !v[i][j]; c.textContent = v[i][j] ? "✓" : ""; c.classList.toggle("on", v[i][j]); });
+  $("#ck").onclick = () => {
+    let got = 0;
+    el.querySelectorAll(".cell").forEach(c => { const i = +c.dataset.i, j = +c.dataset.j, ok = v[i][j] === p.rows[i].vals[j]; if (ok) got++; c.disabled = true; c.classList.add(ok ? "ok" : "bad"); c.textContent = p.rows[i].vals[j] ? "✓" : "–"; });
+    $("#w").innerHTML = `<p class="sans"><b>${got} из ${partMax(p)}</b> · в таблице показаны правильные ответы, красным — где ты ошибся.</p>${p.after || ""}`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+budget(p, el, done){
+  const on = new Set();
+  el.innerHTML = `<span class="tag">Интерактив</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div class="budget sans"><span>Потрачено: <b id="bu">0</b> из ${p.limit}</span><div class="bar"><b id="bb" style="width:0%;background:#3b67d6"></b></div></div>
+  ${p.measures.map((m,i)=>`<div class="item meas" data-i="${i}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span>${m.t}</span><b class="sans" style="white-space:nowrap">${m.cost} ед.</b></div><div class="why"></div></div>`).join("")}
+  <div id="w"></div><button class="btn" id="ck" disabled>Утвердить план</button>`;
+  const upd = () => {
+    const sum = [...on].reduce((a,i)=>a+p.measures[i].cost,0);
+    $("#bu").textContent = sum; $("#bb").style.width = Math.min(100, sum/p.limit*100) + "%"; $("#bb").style.background = sum > p.limit ? "#9e2a1e" : "#3b67d6";
+    $("#ck").disabled = sum > p.limit || on.size === 0; $("#ck").textContent = sum > p.limit ? "Бюджет превышен" : "Утвердить план";
+  };
+  el.querySelectorAll(".meas").forEach(m => m.onclick = () => {
+    if (el.classList.contains("checked")) return;
+    const i = +m.dataset.i; on.has(i) ? on.delete(i) : on.add(i); m.classList.toggle("sel", on.has(i)); upd();
+  });
+  $("#ck").onclick = () => {
+    el.classList.add("checked");
+    const cov = new Set(); [...on].forEach(i => p.measures[i].covers.forEach(r => cov.add(r)));
+    const waste = [...on].filter(i => !p.measures[i].covers.length);
+    let got = cov.size + (waste.length ? 0 : p.bonus);
+    el.querySelectorAll(".meas").forEach(m => { const i = +m.dataset.i, x = p.measures[i];
+      if (on.has(i)) m.classList.add(x.covers.length ? "ok" : "bad");
+      m.querySelector(".why").innerHTML = (on.has(i) ? "<b>Выбрано.</b> " : "") + x.w; });
+    $("#w").innerHTML = `<div class="note"><b>Риски школы:</b><ul style="margin:6px 0 0;padding-left:20px">${p.risks.map(r=>`<li>${cov.has(r.id) ? "✅" : "❌"} ${r.t}</li>`).join("")}</ul>
+      <p style="margin:8px 0 0">Закрыто рисков: <b>${cov.size} из ${p.risks.length}</b>. ${waste.length ? "Часть бюджета ушла на меры, которые не закрывают ни одного риска школы." : `Ни одной лишней траты: +${p.bonus}.`}</p></div><p></p>`;
+    const b = $("#ck"); b.disabled = false; b.textContent = `${got} из ${partMax(p)} · Дальше →`; b.onclick = () => done(got);
+  };
+},
+text(p, el, done){
+  el.innerHTML = `<span class="tag">Ответ</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <textarea id="tx" placeholder="${p.ph || ""}">${esc(S.draft || "")}</textarea>
+  <p class="sans small muted" id="cnt"></p><button class="btn red" id="ck">${ui("submit")}</button>`;
+  const upd = () => { const n = $("#tx").value.trim().length; $("#cnt").textContent = n < p.min ? `Ещё хотя бы ${p.min - n} символов` : "Готово к сдаче"; $("#ck").disabled = n < p.min; S.draft = $("#tx").value; persist(); };
+  $("#tx").oninput = upd; upd();
+  $("#ck").onclick = () => { const pre = p.choiceKey ? (S.choice || {})[p.choiceKey] + ": " : ""; S.answer = pre + $("#tx").value.trim(); done(0); };
+}
+};
+
+/* ---------- финал и отправка ---------- */
+function finish(){
+  const prof = load("profile") || {};
+  const max = lessonMax(L), score = total();
+  const details = L.stages.map((s,i)=>`${s.name}: ${S.scores[i]||0}/${stageMax(s)}`).join("; ") + (S.choice ? "; выбор: " + Object.values(S.choice).join(", ") : "");
+  const code = hash([prof.name, prof.group, LID, score].join("|") + "|dost");
+  const res = { name: prof.name, group: prof.group, lesson: SCHEDULE.find(s=>s.id===LID)?.subject + " · " + L.title,
+    score, max, percent: Math.round(score / max * 100), answer: S.answer, details, code, sent: false };
+  save("res_" + LID, res);
+  results(true);
+}
+async function sendRes(res){
+  const F = CONFIG.FORM; if (!F.action) return "none";
+  const body = new URLSearchParams();
+  for (const k in F.fields) if (F.fields[k]) body.append(F.fields[k], String(res[k] ?? ""));
+  try { await fetch(F.action, {method:"POST", mode:"no-cors", body}); return "ok" } catch(e) { return "fail" }
+}
+async function results(fresh){
+  const res = load("res_" + LID);
+  const line = `${res.name}, гр. ${res.group}. ${res.lesson}. Баллы: ${res.score} из ${res.max}. Код: ${res.code}`;
+  app.innerHTML = `<div class="top"><button class="link" id="back">← В кабинет</button></div>
+  <div class="card folder"><span class="stamp">${ui("doneStamp")}</span>
+  <h1 style="margin-top:12px">${esc(res.name)}, спасибо за работу</h1>
+  <div class="row" style="align-items:flex-end;margin:10px 0 6px"><span class="big">${res.score}</span><span class="sans muted">из ${res.max} баллов</span></div>
+  <table class="res">${L.stages.map((s,i)=>`<tr><td>${i+1}. ${s.name}</td><td>${stageMax(s) ? (S.scores[i] ?? "—") + " / " + stageMax(s) : "сдан"}</td></tr>`).join("")}</table>
+  <div id="snd" class="note sans small">Отправляем результат…</div></div>`;
+  bindBack(); scrollTo(0,0);
+  let st = res.sent ? "ok" : await sendRes(res);
+  if (st === "ok" && !res.sent){ res.sent = true; save("res_" + LID, res); }
+  const backup = `<p style="margin:10px 0 6px">Скопируй строку ниже и отправь преподавателю в чат группы:</p><div class="codebox">${esc(line)}</div><p style="margin-top:8px"><button class="btn ghost" id="cp">Скопировать</button></p>`;
+  $("#snd").innerHTML = st === "ok"
+    ? `<b>Результат отправлен преподавателю.</b> Ничего пересылать не нужно.`
+    : st === "fail"
+      ? `<b>Не получилось отправить: проверь интернет.</b> <button class="link" id="rt">Попробовать ещё раз</button>${backup}`
+      : `<b>Автоотправка пока не подключена.</b>${backup}`;
+  if ($("#rt")) $("#rt").onclick = () => results();
+  if ($("#cp")) $("#cp").onclick = () => { navigator.clipboard && navigator.clipboard.writeText(line); $("#cp").textContent = "Скопировано"; };
+}
+
+function resetAll(){ try { Object.keys(localStorage).filter(k => k.startsWith(KEY)).forEach(k => localStorage.removeItem(k)) } catch(e) {} home(); }
+if (location.search.includes("reset")) { try { Object.keys(localStorage).filter(k => k.startsWith(KEY)).forEach(k => localStorage.removeItem(k)) } catch(e) {} }
+if (location.search.includes("testsend")) {
+  sendRes({name:"Тест Проверка", group:"тест", lesson:"Проверка связи · " + CONFIG.TITLE, score:0, max:0, percent:0, answer:"—", details:"тестовая запись, можно удалить", code:"TEST"})
+    .then(st => { app.innerHTML = `<div class="card"><h2>${st === "ok" ? "Тестовая запись отправлена" : "Не удалось отправить"}</h2><p>${st === "ok" ? "Открой таблицу результатов: там должна появиться строка «Тест Проверка». Если её нет через минуту, напиши мне." : "Проверь интернет и попробуй ещё раз."}</p></div>`; });
+} else {
+home();
+}
+syncClock().then(() => { if (document.querySelector(".lesson")) home() });
+setInterval(() => { if (!LID && document.querySelector(".lesson")) home() }, 60000);
+</script>
+</body>
+</html>
