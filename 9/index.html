@@ -38,12 +38,18 @@ const CONFIG = {
 
 // Расписание: время по Москве
 const SCHEDULE = [
-  { id: "lit6", start: "09:45", end: "10:30", subject: "Литература",
+  { date: "2026-11-03", id: "lit6", start: "09:45", end: "10:30", subject: "Литература",
     title: "Дело Раскольникова", note: "Лекция №6 · Ф. М. Достоевский, «Преступление и наказание»" },
-  { id: "math2", start: "11:25", end: "12:10", subject: "Математика",
+  { date: "2026-11-03", id: "math2", start: "11:25", end: "12:10", subject: "Математика",
     title: "Смена в диспетчерской", note: "Т4.4 Функции, их свойства. Способы задания функций · Т4.5 Тригонометрические функции, их свойства и графики" },
-  { id: "geo3", start: "13:15", end: "14:00", subject: "География",
-    title: "Профиль страны", note: "Политическая география и геополитика. Классификация и типология стран мира" }
+  { date: "2026-11-03", id: "geo3", start: "13:15", end: "14:00", subject: "География",
+    title: "Профиль страны", note: "Политическая география и геополитика. Классификация и типология стран мира" },
+  { date: "2026-11-05", id: "intro14", start: "09:45", end: "10:30", subject: "Введение в специальность",
+    title: "Профиль, который читают", note: "Т1.3 Стратегии поиска работы" },
+  { date: "2026-11-05", id: "inf14", start: "11:25", end: "12:10", subject: "Информатика",
+    title: "Бета-тест", note: "Т1.5 Элементы теории множеств и логики" },
+  { date: "2026-11-05", id: "rus6", start: "13:15", end: "14:00", subject: "Русский язык",
+    title: "Письмо в деканат", note: "Р2 Т2.3 Имя существительное как часть речи" }
 ];
 /* ===================================================================== */
 </script>
@@ -159,6 +165,15 @@ body.brand .status{background:#F4F5F7;border-radius:20px;padding:4px 10px}
 body.brand .status.now{background:#EFFE74;color:#222}
 body.brand .status.done{background:#dfe8fc;color:#222}
 body.brand .lesson.dis{opacity:.55}
+.dayhead{font-family:var(--sans);font-size:15px;font-weight:800;margin:22px 4px 10px}
+.letter p{margin:0 0 .7em}
+.pw{border-bottom:2px dashed #7199F1;cursor:pointer;padding:0 2px;border-radius:3px}
+.pw.on{background:#EFFE74}
+.pw.perr{border-bottom:3px solid var(--red)} .pw.pok{border-bottom:3px solid var(--ok)}
+.pw.miss{outline:2px solid var(--red)}
+.pv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 12px;margin-bottom:12px}
+.pv label{margin:6px 0 4px}
+.pvt td{text-align:right;white-space:nowrap} .pvt th{text-align:left}
 .mini{border-collapse:collapse;font-family:var(--sans);font-size:14px;margin:4px 0}
 .mini td{border:1px solid var(--line);padding:4px 10px;text-align:center}
 .mini td:first-child{font-weight:700;background:#f4f5f7}
@@ -732,6 +747,222 @@ LESSONS.geo3 = {
   ]
 };
 
+/* ============ 5 ноября · Введение в специальность ============ */
+LESSONS.intro14 = {
+  title: "Профиль, который читают", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Работодатель или тимлид тратит на чужой профиль меньше минуты. За это время он ищет одно: что человек уже сделал. А в профессиональном сообществе так же быстро решают, отвечать ли на сообщение новичка.</p>
+<p>Сегодня ты потренируешься отличать сильный профиль от слабого и писать сообщения, на которые хочется ответить.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Конкретика", min: 6,
+    brief: `<ul>
+<li>Хороший профессиональный профиль — это <b>3–5 предложений</b>: кто ты, что умеешь и что уже сделал.</li>
+<li><b>Общие качества</b> («ответственный», «быстро учусь») есть у всех, и проверить их нельзя. Поэтому их пропускают.</li>
+<li><b>Конкретные действия и результаты</b> («сделал бота, им пользуются 40 человек») видно и можно проверить. Их и читают.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Общее или конкретное?", prompt: "Разложи фразы из профилей.",
+      bins: [{id:"g",label:"Общее качество"},{id:"c",label:"Конкретика"}],
+      items: [
+        {t:"Ответственный и коммуникабельный", b:"g", w:"Так пишут почти все, проверить нельзя."},
+        {t:"Сделал телеграм-бота для записи в спортивную секцию, им пользуются 40 человек", b:"c", w:"Есть действие и измеримый результат."},
+        {t:"Быстро обучаюсь новому", b:"g", w:"Лучше показать, чему именно научился и за сколько."},
+        {t:"Решил 120 задач на Python на Stepik", b:"c", w:"Конкретное число, можно проверить."},
+        {t:"Увлекаюсь IT с детства", b:"g", w:"Интерес не показывает умения."},
+        {t:"Сверстал сайт-визитку для знакомого фотографа по его макету", b:"c", w:"Реальная задача для реального заказчика."},
+        {t:"Стремлюсь к саморазвитию", b:"g", w:"Общая фраза без содержания."},
+        {t:"Исправил 3 ошибки в открытом проекте на GitHub", b:"c", w:"Вклад, который видно по ссылке."}
+      ]}
+    ]
+  },
+  { name: "Переписать профиль", min: 8,
+    brief: `<p>Вымышленный студент Кирилл написал профиль: «Я целеустремлённый. Хорошо работаю в команде. Интересуюсь разработкой». Помоги ему: для каждой фразы выбери вариант, который покажет его через действия.</p>
+<p class="small muted">Правило: замени качество на поступок, который это качество доказывает.</p>`,
+    parts: [
+    { type: "mc", q: "«Я целеустремлённый» → как лучше?", opts: ["«Я очень целеустремлённый и упорный человек»","«За месяц довёл до конца свой проект — трекер привычек на Python»","«Целеустремлённость — моё главное качество»"], c: 1, w: "Довести проект до конца — и есть доказательство целеустремлённости." },
+    { type: "mc", q: "«Хорошо работаю в команде» → как лучше?", opts: ["«Умею находить общий язык с любыми людьми»","«Я командный игрок»","«На учебном хакатоне отвечал за интерфейс в команде из 4 человек, сдали проект в срок»"], c: 2, w: "Роль, размер команды и результат вместо слов «командный игрок»." },
+    { type: "mc", q: "«Интересуюсь разработкой» → как лучше?", opts: ["«Изучаю JavaScript, сделал 3 мини-игры для браузера, код лежит на GitHub»","«Обожаю программирование»","«Хочу стать крутым разработчиком»"], c: 0, w: "Что изучаешь и что уже получилось." },
+    { type: "mc", q: "Какой объём профиля оптимален?", opts: ["Одна фраза — чтобы не утомлять","3–5 предложений","Целая страница — чтобы рассказать всё"], c: 1, w: "Достаточно, чтобы показать главное, и коротко, чтобы дочитали." }
+    ]
+  },
+  { name: "Сначала участник", min: 6,
+    brief: `<ul>
+<li>В профессиональное сообщество (чат, форум, канал) сначала <b>входят как участник</b>: читают правила, разбираются в обсуждениях, помогают, благодарят.</li>
+<li>Просить — о помощи, совете, стажировке — лучше <b>после</b> того, как тебя хоть немного узнали.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Хорошее начало или нет?", prompt: "Ты только что вступил в чат разработчиков. Как эти действия скажутся на первом впечатлении?",
+      bins: [{id:"y",label:"Хорошее начало"},{id:"n",label:"Плохое начало"}],
+      items: [
+        {t:"Прочитал закреплённые правила и последние обсуждения", b:"y", w:"Так ты не задашь вопрос, на который уже ответили."},
+        {t:"Ответил новичку на вопрос, в котором уже разобрался сам", b:"y", w:"Помощь другим — лучший способ стать своим."},
+        {t:"Поблагодарил автора полезного разбора", b:"y", w:"Мелочь, которую замечают."},
+        {t:"Сразу написал всем участникам в личку «возьмите на стажировку»", b:"n", w:"Просьба от незнакомца без контекста раздражает."},
+        {t:"Первым сообщением выложил резюме без единого слова", b:"n", w:"Непонятно, чего ты хочешь и почему здесь."},
+        {t:"Написал «помогите, не работает» без подробностей", b:"n", w:"На такой вопрос невозможно ответить."}
+      ]}
+    ]
+  },
+  { name: "Хороший вопрос", min: 10,
+    brief: `<p>Вопрос, на который хочется ответить, состоит из трёх частей:</p>
+<ul>
+<li><b>Контекст:</b> что ты делаешь и на чём.</li>
+<li><b>Что пробовал:</b> какие шаги уже сделал и что получилось.</li>
+<li><b>Что нужно:</b> конкретный вопрос или просьба.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Разбери сообщение", prompt: `Вот сообщение в чат: «Делаю учебный сайт на HTML и CSS. Хочу, чтобы меню стояло в одну строку. Пробовал display: inline для пунктов, но между ними остаются большие отступы. Ещё убрал margin у списка — не помогло. Подскажите, каким свойством правильно выстроить меню в строку?» Разложи его части.`,
+      bins: [{id:"c",label:"Контекст"},{id:"t",label:"Что пробовал"},{id:"n",label:"Что нужно"}],
+      items: [
+        {t:"Делаю учебный сайт на HTML и CSS", b:"c", w:"Задача и инструменты."},
+        {t:"Хочу, чтобы меню стояло в одну строку", b:"c", w:"Цель — тоже часть контекста."},
+        {t:"Пробовал display: inline для пунктов, но остаются отступы", b:"t", w:"Шаг и его результат."},
+        {t:"Убрал margin у списка — не помогло", b:"t", w:"Ещё одна попытка."},
+        {t:"Подскажите, каким свойством правильно выстроить меню в строку?", b:"n", w:"Чёткий вопрос, на который можно ответить."}
+      ]},
+    { type: "mc", q: "«Не запускается Python, что делать???» Чего здесь не хватает?", opts: ["Ничего, вопрос понятный","Контекста и того, что уже пробовал: какая система, какая ошибка, что делал","Только смайлика в конце"], c: 1, w: "Без контекста и попыток отвечающему придётся задавать встречные вопросы — и чаще всего он просто промолчит." },
+    { type: "mc", q: "Какое сообщение получит ответ быстрее?", opts: ["«Ребят, кто шарит в Git, напишите в личку»","«Сделал коммит не в ту ветку в Git. Пробовал git checkout main — коммит остался в старой ветке. Как перенести один коммит в main?»","«Git — сложная штука, как вы его вообще учили?»"], c: 1, w: "Есть все три части: контекст, попытка и конкретный вопрос." }
+    ]
+  },
+  { name: "Итог", min: 4,
+    brief: `<p>Три коротких вопроса, чтобы закрепить главное.</p>`,
+    parts: [
+    { type: "mc", q: "Что в профиле убедительнее всего?", opts: ["Список личных качеств","Конкретные действия и результаты","Подробная биография"], c: 1, w: "Сделанное убеждает сильнее обещаний." },
+    { type: "mc", q: "Что лучше сделать первым делом в новом профессиональном сообществе?", opts: ["Попросить о стажировке","Разослать резюме","Почитать обсуждения и начать участвовать"], c: 2, w: "Сначала участник, потом просьбы." },
+    { type: "mc", q: "Из чего состоит хороший вопрос?", opts: ["Контекст + что пробовал + что нужно","Приветствие + смайлик + вопрос","Вопрос + просьба ответить срочно"], c: 0, w: "Эти три части экономят время тому, кто отвечает." }
+    ]
+  }
+  ]
+};
+
+/* ============ 5 ноября · Информатика ============ */
+const BETA = `<div class="refcard"><span class="tag">Бета-тест приложения «Расписание»</span>
+<div class="rf"><span>Всего тестировщиков (U)</span><b>20</b></div>
+<div class="rf"><span>Тестировали на Android (A)</span><b>10</b></div>
+<div class="rf"><span>Тестировали на iOS (B)</span><b>9</b></div>
+<div class="rf"><span>Тестировали и там, и там</span><b>3</b></div>
+<p class="small muted sans" style="margin:6px 0 0">Остальные проверяли только веб-версию.</p></div>`;
+const VF = ["A ∪ B","A ∩ B","A \\ B","B \\ A","Ā (дополнение A)"];
+const VC = ["3","4","6","7","10","16"];
+LESSONS.inf14 = {
+  title: "Бета-тест", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Команда выпускает приложение «Расписание» и провела бета-тест: 20 человек проверяли его на разных устройствах. Тимлид просит разобраться, кто на чём тестировал, и показать это на диаграммах Эйлера — Венна.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Операции", min: 6,
+    brief: `<ul>
+<li><b>Универсальное множество U</b> — все элементы, о которых идёт речь. На диаграмме это прямоугольник.</li>
+<li><b>Объединение A ∪ B</b> — элементы, которые есть хотя бы в одном множестве.</li>
+<li><b>Пересечение A ∩ B</b> — элементы, которые есть в обоих.</li>
+<li><b>Разность A \\ B</b> — элементы A, которых нет в B. Важно: <b>A \\ B ≠ B \\ A</b>.</li>
+<li><b>Дополнение Ā</b> — всё из U, что не входит в A. Дополнение всегда считают <b>до универсального множества</b>.</li>
+</ul>`,
+    parts: [
+    { type: "mc", q: "A = {1, 2, 3, 4}, B = {3, 4, 5}. Чему равно A \\ B?", opts: ["{5}","{1, 2}","{3, 4}"], c: 1, w: "Из A убираем всё, что есть в B: остаются 1 и 2." },
+    { type: "mc", q: "Те же множества. Чему равно B \\ A?", opts: ["{5}","{1, 2}","{1, 2, 5}"], c: 0, w: "Из B убираем всё, что есть в A: остаётся 5. Разность зависит от порядка." },
+    { type: "mc", q: "U = {1, …, 6}, A = {1, 2, 3, 4}. Чему равно Ā?", opts: ["{5}","{5, 6}","пустое множество"], c: 1, w: "Дополнение — до U: всё из U, чего нет в A." }
+    ]
+  },
+  { name: "Диаграммы", min: 22,
+    brief: `${BETA}<p>Сначала разберись, сколько человек в каждой области диаграммы: только Android, только iOS, оба устройства, ни одного из них. Потом для каждого вопроса тимлида закрась нужные области, выбери формулу и посчитай людей.</p>`,
+    parts: [
+    { type: "venn", k: 1, title: "Оба устройства", fig: BETA, q: "Кто тестировал и на Android, и на iOS?", regions:["ab"], formulas: VF, f: 1, counts: VC, c: 0, w: "Пересечение A ∩ B — 3 человека по условию." },
+    { type: "venn", k: 2, title: "Хотя бы одно мобильное", fig: BETA, q: "Кто тестировал хотя бы на одном мобильном устройстве?", regions:["a","ab","b"], formulas: VF, f: 0, counts: VC, c: 5, w: "|A ∪ B| = |A| + |B| − |A ∩ B| = 10 + 9 − 3 = 16." },
+    { type: "venn", k: 3, title: "Только Android", fig: BETA, q: "Кто тестировал на Android, но не на iOS?", regions:["a"], formulas: VF, f: 2, counts: VC, c: 3, w: "A \\ B = 10 − 3 = 7." },
+    { type: "venn", k: 4, title: "Только iOS", fig: BETA, q: "Кто тестировал на iOS, но не на Android?", regions:["b"], formulas: VF, f: 3, counts: VC, c: 2, w: "B \\ A = 9 − 3 = 6. Сравни с прошлой диаграммой: A \\ B ≠ B \\ A." },
+    { type: "venn", k: 5, title: "Без Android", fig: BETA, q: "Кто вообще не тестировал на Android?", regions:["b","n"], formulas: VF, f: 4, counts: VC, c: 4, w: "Ā = U \\ A = 20 − 10 = 10. Сюда входят и те, кто тестировал только iOS, и те, кто проверял только веб-версию." }
+    ]
+  },
+  { name: "Проверка", min: 6,
+    brief: `<p>Три вопроса, чтобы закрепить главное.</p>`,
+    parts: [
+    { type: "mc", q: "Почему |A ∪ B| ≠ |A| + |B| в нашем бета-тесте?", opts: ["Тех, кто тестировал на обоих устройствах, иначе посчитали бы дважды","Потому что объединение всегда меньше суммы на 1","Потому что в U есть веб-тестировщики"], c: 0, w: "Пересечение вычитаем один раз: 10 + 9 − 3 = 16." },
+    { type: "mc", q: "Сколько человек проверяли только веб-версию?", opts: ["4","3","6"], c: 0, w: "Это дополнение объединения: 20 − 16 = 4." },
+    { type: "mc", q: "Какое утверждение верно?", opts: ["A \\ B и B \\ A всегда равны","Дополнение считают до универсального множества","Пересечение всегда больше объединения"], c: 1, w: "Без U непонятно, что значит «всё, кроме A»." }
+    ]
+  }
+  ]
+};
+
+/* ============ 5 ноября · Русский язык ============ */
+const RULES = ["род существительного — по словарю","родительный падеж множественного числа","предлог требует определённого падежа"];
+LESSONS.rus6 = {
+  title: "Письмо в деканат", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Официальное письмо читают внимательно, и ошибка в форме слова сразу бросается в глаза: «согласно приказа» или «сильный мозоль» портят впечатление сильнее, чем кажется.</p>
+<p>Сегодня ты проверишь письмо вымышленного студента Максима в деканат: найдёшь ошибки в формах существительных, исправишь их и объяснишь каждую.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Род по словарю", min: 7,
+    brief: `<ul>
+<li>Род существительного определяют <b>по словарю</b>, а не по окончанию и не «на слух».</li>
+<li>Слова-ловушки мужского рода: <b>тюль, шампунь, рояль, кофе</b>. Женского рода: <b>мозоль, туфля</b>.</li>
+<li><b>Общий род</b> — слова, которые могут относиться и к мужчине, и к женщине: <b>сирота, плакса, умница</b> («он круглый сирота», «она круглая сирота»).</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Какой род?", prompt: "Определи род существительного.",
+      bins: [{id:"m",label:"Мужской"},{id:"f",label:"Женский"},{id:"o",label:"Общий"}],
+      items: [
+        {t:"тюль", b:"m", w:"Белый тюль."},
+        {t:"шампунь", b:"m", w:"Новый шампунь."},
+        {t:"кофе", b:"m", w:"Горячий кофе. Средний род допускается только в разговорной речи."},
+        {t:"рояль", b:"m", w:"Чёрный рояль."},
+        {t:"мозоль", b:"f", w:"Больная мозоль."},
+        {t:"туфля", b:"f", w:"Левая туфля."},
+        {t:"сирота", b:"o", w:"Круглый сирота / круглая сирота."},
+        {t:"умница", b:"o", w:"Он умница / она умница."}
+      ]}
+    ]
+  },
+  { name: "Найди ошибки", min: 10,
+    brief: `<ul>
+<li><b>Родительный падеж множественного числа</b> у некоторых слов образуется не так, как хочется: много <b>носков</b>, пара <b>туфель</b>, килограмм <b>помидоров</b>, но пара <b>сапог</b>, нет <b>чулок</b>.</li>
+<li><b>Управление:</b> предлог требует определённого падежа. <b>Согласно</b>, <b>благодаря</b>, <b>вопреки</b> — дательный: согласно приказу. <b>По</b> в значении «после» — предложный: по окончании, по приезде, по возвращении.</li>
+</ul>`,
+    parts: [
+    { type: "proofread", title: "Письмо Максима",
+      prompt: "Нажми на все выделенные фрагменты, в которых есть ошибка в форме существительного. Осторожно: часть выделенного написана правильно.",
+      text: `<p>Уважаемый деканат!</p>
+<p>Обращаюсь к вам [[согласно приказа|err]] №15 о пересдачах. В октябре я пропустил экзамен по уважительной причине. [[По приезде|ok]] с соревнований я натёр [[сильный мозоль|err]] и неделю не мог нормально ходить, а других [[туфлей|err]] у меня не было.</p>
+<p>Прошу разрешить мне пересдать экзамен [[по окончанию|err]] семестра. Справку от врача прилагаю.</p>
+<p>Также прошу заменить [[старую тюль|err]] в комнате 214 [[в общежитии|ok]]: она порвалась. Мама уже прислала мне [[пять пар носок|err]], так что к зиме я готов.</p>
+<p>P. S. Очень [[скучаю по вам|ok]] и по занятиям.</p>
+<p>Максим Лебедев</p>` }
+    ]
+  },
+  { name: "Было → Стало → Правило", min: 12,
+    brief: `<p>Теперь заполни таблицу исправлений: для каждой ошибки выбери правильную форму и правило, которое она нарушает.</p>`,
+    parts: [
+    { type: "fill", title: "Таблица исправлений",
+      items: [
+        {a:"Было: «согласно приказа». Стало:", o:["согласно приказу","согласно приказом","согласно приказе"], c:0, z:""},
+        {a:"Правило:", o:RULES, c:2, z:""},
+        {a:"Было: «сильный мозоль». Стало:", o:["сильную мозоль","сильное мозоль","сильного мозоля"], c:0, z:""},
+        {a:"Правило:", o:RULES, c:0, z:""},
+        {a:"Было: «других туфлей». Стало:", o:["других туфлях","других туфель","других туфлев"], c:1, z:""},
+        {a:"Правило:", o:RULES, c:1, z:""},
+        {a:"Было: «по окончанию семестра». Стало:", o:["по окончании семестра","по окончание семестра","по окончанием семестра"], c:0, z:""},
+        {a:"Правило:", o:RULES, c:2, z:""},
+        {a:"Было: «старую тюль». Стало:", o:["старое тюль","старый тюль","старой тюли"], c:1, z:""},
+        {a:"Правило:", o:RULES, c:0, z:""},
+        {a:"Было: «пять пар носок». Стало:", o:["пять пар носков","пять пар носка","пять пар носоков"], c:0, z:""},
+        {a:"Правило:", o:RULES, c:1, z:""}
+      ]}
+    ]
+  },
+  { name: "Итог", min: 4,
+    brief: `<p>Три коротких вопроса.</p>`,
+    parts: [
+    { type: "mc", q: "Как правильно?", opts: ["благодаря другу","благодаря друга","благодаря другом"], c: 0, w: "Благодаря, как и согласно, требует дательного падежа." },
+    { type: "mc", q: "Почему «скучаю по вам» в письме — не ошибка?", opts: ["Современная норма допускает «скучаю по вам»","Потому что это постскриптум","Это ошибка, допустимо только «по вас»"], c: 0, w: "Сейчас «скучаю по вам» — норма. «По вас» — более книжный, традиционный вариант, он тоже не ошибка." },
+    { type: "mc", q: "Как правильно?", opts: ["пара сапогов","пара сапог","пара сапогей"], c: 1, w: "Сапог — как и туфель, чулок: родительный падеж множественного числа без окончания." }
+    ]
+  }
+  ]
+};
+
 /* ===================== ДВИЖОК ===================== */
 const $ = s => document.querySelector(s);
 const app = $("#app");
@@ -751,9 +982,9 @@ async function syncClock(){
   } catch(e) {}
 }
 const now = () => Date.now() + clockShift;
-function mskTime(hm){ // момент начала по Москве (UTC+3)
+function mskTime(hm, date){ // момент по Москве (UTC+3)
   if (!hm) return null;
-  const [y,m,d] = CONFIG.DATE.split("-").map(Number); const [h,mi] = hm.split(":").map(Number);
+  const [y,m,d] = (date || CONFIG.DATE).split("-").map(Number); const [h,mi] = hm.split(":").map(Number);
   return Date.UTC(y, m-1, d, h-3, mi);
 }
 const localHM = t => new Date(t).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
@@ -763,6 +994,9 @@ function partMax(p){
   if (p.type === "reveal") return p.items.length * 3;
   if (p.type === "truth") return 1 << p.vars.length;
   if (p.type === "dnf") return 2;
+  if (p.type === "venn") return 3;
+  if (p.type === "proofread") return (p.text.match(/\[\[/g) || []).length;
+  if (p.type === "pivot") return p.qs.length;
   if (p.type === "grid") return p.rows.length * p.cols.length;
   if (p.type === "budget") return p.risks.length + p.bonus;
   if (p.type === "audit") return p.rows.length + p.rows.filter(r => r.err).length;
@@ -783,7 +1017,7 @@ function home(){
   let html = `<div class="card folder">
     <span class="tag">${esc(CONFIG.SUBTITLE)}</span>
     <h1>${esc(CONFIG.TITLE).replace(/(\d)-(\d)/g,"$1\u2011$2")}</h1>
-    <p class="muted sans small">Расписание на ${new Date(CONFIG.DATE+"T12:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"})} · время московское</p>`;
+    <p class="muted sans small">Расписание занятий · время московское</p>`;
   if (!prof){
     html += `<label for="nm">Фамилия и имя — как на платформе</label>
       <input type="text" id="nm" placeholder="Иванов Иван" autocomplete="name">
@@ -799,8 +1033,14 @@ function home(){
   html += `<div class="row sans small"><span><b>${esc(prof.name)}</b> · группа ${esc(prof.group)}</span>
     <button class="link" id="chg">это не я</button></div></div>`;
   const t = now();
-  SCHEDULE.forEach(s => {
-    const st = mskTime(s.start), en = mskTime(s.end);
+  const today = new Date(t + 3*3600e3).toISOString().slice(0,10);
+  const dateOf = s => s.date || CONFIG.DATE;
+  const dates = [...new Set(SCHEDULE.map(dateOf))].sort((x,y) => (x === today ? -1 : y === today ? 1 : y.localeCompare(x)));
+  const dname = d => new Date(d+"T12:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",weekday:"long"});
+  dates.forEach(d => {
+    html += `<h3 class="dayhead">${d === today ? "Сегодня, " : d < today ? "Прошлые занятия · " : ""}${dname(d)}</h3>`;
+    SCHEDULE.filter(s => dateOf(s) === d).forEach(s => {
+    const st = mskTime(s.start, d), en = mskTime(s.end, d);
     const done = load("res_" + s.id);
     let status = "", cls = "", open = !s.soon;
     if (s.soon){ status = `<span class="status lock">готовится</span>`; }
@@ -814,6 +1054,7 @@ function home(){
       <div class="time">${s.start || "—"}${s.end ? "–"+s.end : ""}${localNote}</div>
       <div class="body"><span class="tag">${esc(s.subject)}</span><h3>${esc(s.title)}</h3>${s.note?`<p class="muted small" style="margin:0">${esc(s.note)}</p>`:""}</div>
       <div>${status}</div></div>`;
+    });
   });
   if (CONFIG.TEST_MODE) html += `<p style="text-align:center"><button class="link sans small" id="rst">Сбросить прогресс (режим проверки)</button></p>`;
   app.innerHTML = html;
@@ -840,7 +1081,7 @@ function persist(){ save("ls_" + LID, S) }
 function total(){ return S.scores.reduce((a,b)=>a+(b||0),0) }
 function header(){
   const steps = L.stages.map((_,i)=>`<i class="${i < S.stage ? "on" : i === S.stage ? "cur" : ""}"></i>`).join("");
-  return `<div class="top"><button class="link" id="back">← В кабинет</button><span class="pts">${total()} баллов</span></div><div class="steps">${steps}</div>`;
+  return `<div class="top"><button class="link" id="back">← В кабинет</button><span class="pts">Баллы: ${total()}</span></div><div class="steps">${steps}</div>`;
 }
 function bindBack(){ $("#back").onclick = () => { LID = null; home(); } }
 function intro(){
@@ -1156,6 +1397,121 @@ budget(p, el, done){
     $("#w").innerHTML = `<div class="note"><b>Риски школы:</b><ul style="margin:6px 0 0;padding-left:20px">${p.risks.map(r=>`<li>${cov.has(r.id) ? "✅" : "❌"} ${r.t}</li>`).join("")}</ul>
       <p style="margin:8px 0 0">Закрыто рисков: <b>${cov.size} из ${p.risks.length}</b>. ${waste.length ? "Часть бюджета ушла на меры, которые не закрывают ни одного риска школы." : `Ни одной лишней траты: +${p.bonus}.`}</p></div><p></p>`;
     const b = $("#ck"); b.disabled = false; b.textContent = `${got} из ${partMax(p)} · Дальше →`; b.onclick = () => done(got);
+  };
+},
+hexsplit(p, el, done){
+  const seen = new Set();
+  el.innerHTML = `<span class="tag">Интерактив</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <input type="text" id="hx" value="0x2F10" style="font-family:Consolas,Menlo,monospace;font-size:20px" aria-label="Адрес">
+  <div id="hv" style="margin:14px 0"></div><button class="btn" id="nx" disabled>Попробуй ещё адреса</button>`;
+  const draw = () => {
+    const raw = $("#hx").value.trim().replace(/^0x/i,"");
+    if (!/^[0-9a-f]{1,4}$/i.test(raw)){ $("#hv").innerHTML = `<p class="muted">Введи от 1 до 4 hex-цифр, например 0x2F10.</p>`; return; }
+    const v = parseInt(raw,16), bin = v.toString(2).padStart(16,"0"), hex = v.toString(16).toUpperCase().padStart(4,"0");
+    seen.add(v);
+    $("#hv").innerHTML = `<div class="codebox" style="font-size:18px;line-height:1.8">
+      <span style="background:#dfe8fc;padding:2px 4px;border-radius:4px">${bin.slice(0,4)}</span> <span style="background:#EFFE74;padding:2px 4px;border-radius:4px">${bin.slice(4,8)} ${bin.slice(8,12)} ${bin.slice(12)}</span><br>
+      <span style="background:#dfe8fc;padding:2px 4px;border-radius:4px">0x${hex[0]}</span> <span style="background:#EFFE74;padding:2px 4px;border-radius:4px">0x${hex.slice(1)}</span></div>
+      <p class="sans" style="margin-top:10px"><span style="background:#dfe8fc;padding:2px 6px;border-radius:4px">страница ${parseInt(hex[0],16)}</span> старшие 4 бита · <span style="background:#EFFE74;padding:2px 6px;border-radius:4px">смещение 0x${hex.slice(1)}</span> младшие 12 бит</p>`;
+    if (seen.size >= 3){ $("#nx").disabled = false; $("#nx").textContent = "Дальше →"; }
+  };
+  $("#hx").oninput = draw; draw();
+  $("#nx").onclick = () => done(0);
+},
+venn(p, el, done){
+  const R = {a:"только A", ab:"A и B", b:"только B", n:"вне A и B"}, on = new Set();
+  const A = [125,105], B = [205,105], r = 72;
+  const svg = () => `<svg viewBox="0 0 330 210" id="vs" style="width:100%;max-width:420px;display:block;margin:8px 0;cursor:pointer;touch-action:manipulation">
+   <defs><mask id="mA${p.k}"><rect width="330" height="210" fill="#fff"/><circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#000"/></mask>
+   <mask id="mB${p.k}"><rect width="330" height="210" fill="#fff"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#000"/></mask>
+   <clipPath id="cB${p.k}"><circle cx="${B[0]}" cy="${B[1]}" r="${r}"/></clipPath></defs>
+   <rect x="5" y="5" width="320" height="200" rx="12" fill="${on.has("n")?"#7199F1":"#fff"}" stroke="#222" stroke-width="1.5"/>
+   <circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#fff"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#fff"/>
+   ${on.has("a")?`<circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#7199F1" mask="url(#mB${p.k})"/>`:""}
+   ${on.has("b")?`<circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#7199F1" mask="url(#mA${p.k})"/>`:""}
+   ${on.has("ab")?`<circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#7199F1" clip-path="url(#cB${p.k})"/>`:""}
+   <circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="none" stroke="#222" stroke-width="2"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="none" stroke="#222" stroke-width="2"/>
+   <text x="20" y="28" font-family="sans-serif" font-weight="700" font-size="15">U</text>
+   <text x="${A[0]-40}" y="${A[1]-50}" font-family="sans-serif" font-weight="700" font-size="16">A</text>
+   <text x="${B[0]+32}" y="${B[1]-50}" font-family="sans-serif" font-weight="700" font-size="16">B</text></svg>`;
+  el.innerHTML = `<span class="tag">Диаграмма ${p.k}</span><h2>${p.title}</h2>${p.fig || ""}<p>${p.q}</p>
+   <div id="vd">${svg()}</div><p class="sans small muted">Нажимай на области, чтобы закрасить их. Повторное нажатие снимает закраску.</p>
+   <div class="fill item"><label style="margin:0">Формула:</label><select id="vf"><option value="">…</option>${p.formulas.map((o,i)=>`<option value="${i}">${o}</option>`).join("")}</select></div>
+   <div class="fill item"><label style="margin:0">Сколько тестировщиков в этом множестве?</label><select id="vc"><option value="">…</option>${p.counts.map((o,i)=>`<option value="${i}">${o}</option>`).join("")}</select></div>
+   <div id="w"></div><button class="btn" id="ck" disabled>Проверить</button>`;
+  const ready = () => $("#ck").disabled = !(on.size && $("#vf").value !== "" && $("#vc").value !== "");
+  const bind = () => { $("#vs").onclick = e => {
+    if (el.classList.contains("checked")) return;
+    const bx = $("#vs").getBoundingClientRect(), x = (e.clientX - bx.left) * 330 / bx.width, y = (e.clientY - bx.top) * 210 / bx.height;
+    const inA = Math.hypot(x-A[0], y-A[1]) <= r, inB = Math.hypot(x-B[0], y-B[1]) <= r;
+    const id = inA && inB ? "ab" : inA ? "a" : inB ? "b" : "n";
+    on.has(id) ? on.delete(id) : on.add(id); $("#vd").innerHTML = svg(); bind(); ready();
+  }};
+  bind(); $("#vf").onchange = ready; $("#vc").onchange = ready;
+  $("#ck").onclick = () => {
+    el.classList.add("checked");
+    const okR = p.regions.length === on.size && p.regions.every(x => on.has(x));
+    const okF = +$("#vf").value === p.f, okC = +$("#vc").value === p.c, got = okR + okF + okC;
+    $("#vf").disabled = $("#vc").disabled = true;
+    on.clear(); p.regions.forEach(x => on.add(x)); $("#vd").innerHTML = svg();
+    $("#w").innerHTML = `<div class="note"><b>${got} из 3.</b> Области: ${okR ? "верно" : "правильные закрашены на диаграмме"}. Формула: ${okF ? "верно" : p.formulas[p.f]}. Количество: ${okC ? "верно" : p.counts[p.c]}.<br>${p.w}</div><p></p>`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+proofread(p, el, done){
+  const marks = new Set();
+  let i = 0; const html = p.text.replace(/\[\[(.+?)\|(err|ok)\]\]/g, (_, w) => `<span class="pw" data-i="${i++}">${w}</span>`);
+  const keys = [...p.text.matchAll(/\[\[(.+?)\|(err|ok)\]\]/g)].map(m => m[2]);
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div class="refcard letter">${html}</div><div id="w"></div><button class="btn" id="ck">Проверить</button>`;
+  el.querySelectorAll(".pw").forEach(s => s.onclick = () => { if (el.classList.contains("checked")) return; const k = +s.dataset.i; marks.has(k) ? marks.delete(k) : marks.add(k); s.classList.toggle("on", marks.has(k)); });
+  $("#ck").onclick = () => {
+    el.classList.add("checked"); let got = 0;
+    el.querySelectorAll(".pw").forEach(s => { const k = +s.dataset.i, err = keys[k] === "err", ok = marks.has(k) === err; if (ok) got++; s.classList.add(err ? "perr" : "pok"); if (!ok) s.classList.add("miss"); });
+    $("#w").innerHTML = `<div class="note"><b>${got} из ${keys.length}.</b> Красным подчёркнуты настоящие ошибки, зелёным — слова, которые написаны верно. Рамкой отмечено, где ты ошибся.</div><p></p>`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+pivot(p, el, done){
+  const F = {m:"Менеджер", mo:"Месяц", c:"Категория"}, idx = {m:0, mo:1, c:2};
+  const order = {mo:["Январь","Февраль","Март"]};
+  const st = {rows:"m", cols:"", agg:"sum", show:"val", filt:""};
+  const fmt = v => st.show === "pct" ? v.toFixed(1).replace(".",",") + " %" : Math.round(v).toLocaleString("ru-RU") + " ₽";
+  const vals = k => { const u = [...new Set(p.data.map(r => r[idx[k]]))]; return order[k] ? order[k].filter(x => u.includes(x)) : u.sort(); };
+  const opt = (id, list, cur) => `<select id="${id}">${list.map(([v,l]) => `<option value="${v}" ${v===cur?"selected":""}>${l}</option>`).join("")}</select>`;
+  const fields = [["m","Менеджер"],["mo","Месяц"],["c","Категория"]];
+  el.innerHTML = `<span class="tag">Конструктор</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div class="pv">
+   <div><label>Строки</label>${opt("pvr", fields, st.rows)}</div>
+   <div><label>Столбцы</label>${opt("pvc", [["","— нет —"],...fields], st.cols)}</div>
+   <div><label>Значения: Сумма продаж</label>${opt("pva", [["sum","Сумма"],["avg","Среднее"],["cnt","Количество сделок"]], st.agg)}</div>
+   <div><label>Показывать как</label>${opt("pvs", [["val","Значение"],["pct","% от общего итога"]], st.show)}</div>
+   <div><label>Срез: категория</label>${opt("pvf", [["","Все"],...vals("c").map(v=>[v,v])], st.filt)}</div>
+  </div>
+  <div id="pt" style="overflow-x:auto"></div>
+  <h3 style="margin-top:18px">Вопросы тимлида</h3>
+  ${p.qs.map((q,i)=>`<div class="fill item" data-i="${i}">${q.q}<select><option value="">…</option>${q.o.map((o,j)=>`<option value="${j}">${o}</option>`).join("")}</select><div class="why"></div></div>`).join("")}
+  <button class="btn" id="ck" disabled>Проверить ответы</button>`;
+  const draw = () => {
+    const D = p.data.filter(r => !st.filt || r[2] === st.filt), all = p.data.filter(r => !st.filt || r[2] === st.filt);
+    const R = vals(st.rows), C = st.cols && st.cols !== st.rows ? vals(st.cols) : [null];
+    const agg = rs => !rs.length ? null : st.agg === "sum" ? rs.reduce((a,r)=>a+r[3],0) : st.agg === "avg" ? rs.reduce((a,r)=>a+r[3],0)/rs.length : rs.length;
+    const grand = agg(all);
+    const cell = rs => { const v = agg(rs); if (v === null) return "—"; if (st.show === "pct") return st.agg === "avg" ? "—" : fmt(v / grand * 100); return st.agg === "cnt" ? String(v) : fmt(v); };
+    const sel = (r, c) => D.filter(x => x[idx[st.rows]] === r && (c === null || x[idx[st.cols]] === c));
+    let h = `<table class="tt pvt"><tr><th>${F[st.rows]}</th>${C.map(c=>`<th>${c ?? "Итого"}</th>`).join("")}${C[0] !== null ? "<th>Итого</th>" : ""}</tr>`;
+    R.forEach(r => { h += `<tr><th>${r}</th>${C.map(c=>`<td>${cell(sel(r,c))}</td>`).join("")}${C[0] !== null ? `<td><b>${cell(sel(r,null))}</b></td>` : ""}</tr>`; });
+    h += `<tr><th>Общий итог</th>${C.map(c=>`<td><b>${cell(D.filter(x => c === null || x[idx[st.cols]] === c))}</b></td>`).join("")}${C[0] !== null ? `<td><b>${cell(D)}</b></td>` : ""}</tr></table>`;
+    $("#pt").innerHTML = h;
+  };
+  [["pvr","rows"],["pvc","cols"],["pva","agg"],["pvs","show"],["pvf","filt"]].forEach(([id,k]) => $("#"+id).onchange = e => { st[k] = e.target.value; draw(); });
+  const sels = [...el.querySelectorAll(".fill select")];
+  sels.forEach(s => s.onchange = () => $("#ck").disabled = sels.some(z => z.value === ""));
+  draw();
+  $("#ck").onclick = () => {
+    let got = 0; el.classList.add("checked");
+    el.querySelectorAll(".fill").forEach(f => { const q = p.qs[f.dataset.i], s = f.querySelector("select"), ok = +s.value === q.c; if (ok) got++; s.disabled = true; f.classList.add(ok?"ok":"bad"); f.querySelector(".why").innerHTML = (ok ? "<b>Верно.</b> " : `<b>Правильно: ${q.o[q.c]}.</b> `) + q.w; });
+    const b = $("#ck"); b.textContent = `${got} из ${p.qs.length} · Дальше →`; b.onclick = () => done(got);
   };
 },
 text(p, el, done){
