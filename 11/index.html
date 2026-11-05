@@ -38,12 +38,18 @@ const CONFIG = {
 
 // Расписание: время по Москве
 const SCHEDULE = [
-  { id: "ib7", start: "09:45", end: "10:30", subject: "Основы информационной безопасности",
+  { date: "2026-11-03", id: "ib7", start: "09:45", end: "10:30", subject: "Основы информационной безопасности",
     title: "Аудитор на один день", note: "Т2.1 Методологические подходы к защите информации" },
-  { id: "fin10", start: "11:25", end: "12:10", subject: "Основы финансовой грамотности",
+  { date: "2026-11-03", id: "fin10", start: "11:25", end: "12:10", subject: "Основы финансовой грамотности",
     title: "Дашборд Артёма", note: "Роль предпринимательства. Условия развития стартапов и малого бизнеса" },
-  { id: "bool10", start: "13:15", end: "14:00", subject: "Математический аппарат в отрасли ИТ",
-    title: "Правило доступа", note: "Т8.2 Булевы функции" }
+  { date: "2026-11-03", id: "bool10", start: "13:15", end: "14:00", subject: "Математический аппарат в отрасли ИТ",
+    title: "Правило доступа", note: "Т8.2 Булевы функции" },
+  { date: "2026-11-05", id: "os9", start: "09:45", end: "10:30", subject: "Операционные системы и среды",
+    title: "Трансляция адреса", note: "Т5 Управление памятью" },
+  { date: "2026-11-05", id: "arch5", start: "11:25", end: "12:10", subject: "Архитектура аппаратных средств",
+    title: "Ускоряем фильтр", note: "Т2.4 Технологии повышения производительности процессоров" },
+  { date: "2026-11-05", id: "itpd11", start: "13:15", end: "14:00", subject: "ИТ в профессиональной деятельности",
+    title: "Отчёт по продажам", note: "Т2.2 Табличный процессор: анализ данных" }
 ];
 /* ===================================================================== */
 </script>
@@ -159,6 +165,15 @@ body.brand .status{background:#F4F5F7;border-radius:20px;padding:4px 10px}
 body.brand .status.now{background:#EFFE74;color:#222}
 body.brand .status.done{background:#dfe8fc;color:#222}
 body.brand .lesson.dis{opacity:.55}
+.dayhead{font-family:var(--sans);font-size:15px;font-weight:800;margin:22px 4px 10px}
+.letter p{margin:0 0 .7em}
+.pw{border-bottom:2px dashed #7199F1;cursor:pointer;padding:0 2px;border-radius:3px}
+.pw.on{background:#EFFE74}
+.pw.perr{border-bottom:3px solid var(--red)} .pw.pok{border-bottom:3px solid var(--ok)}
+.pw.miss{outline:2px solid var(--red)}
+.pv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 12px;margin-bottom:12px}
+.pv label{margin:6px 0 4px}
+.pvt td{text-align:right;white-space:nowrap} .pvt th{text-align:left}
 .mini{border-collapse:collapse;font-family:var(--sans);font-size:14px;margin:4px 0}
 .mini td{border:1px solid var(--line);padding:4px 10px;text-align:center}
 .mini td:first-child{font-weight:700;background:#f4f5f7}
@@ -547,6 +562,237 @@ LESSONS.bool10 = {
   ]
 };
 
+/* ============ 5 ноября · Операционные системы ============ */
+const P7 = `<div class="refcard"><span class="tag">Процесс proc_7 · страница 4096 байт</span>
+<div class="rf"><span>Код · лимит 3 стр.</span><b>0→4 · 1→9 · 2→1</b></div>
+<div class="rf"><span>Данные · лимит 2 стр.</span><b>0→6 · 1→12 (0xC)</b></div>
+<div class="rf"><span>Стек · лимит 4 стр.</span><b>0→3 · 1→10 (0xA) · 2→5 · 3→8</b></div>
+<p class="small muted sans" style="margin:6px 0 0">Справа: номер страницы → номер фрейма</p></div>`;
+const addrTask = (seg, addr) => `${P7}<div class="note">Обращение: сегмент <b>«${seg}»</b>, логический адрес <b>${addr}</b></div><p></p>`;
+
+LESSONS.os9 = {
+  title: "Трансляция адреса", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Программа обращается к памяти по логическим адресам, а данные лежат в физической памяти. Между ними стоит операционная система: она переводит один адрес в другой через таблицы сегментов и страниц.</p>
+<p>Сегодня ты будешь делать это вручную, как процессор: разбивать адрес на части, искать фрейм в таблице и находить, где программа вышла за пределы своей памяти.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Как устроен адрес", min: 8,
+    brief: `<ul>
+<li>При <b>сегментно-страничной</b> организации память процесса делится на сегменты (код, данные, стек), а каждый сегмент — на страницы. У каждого сегмента своя таблица страниц и свой <b>лимит</b>.</li>
+<li><b>Логический адрес = сегмент + страница + смещение.</b></li>
+<li>Если страница 4096 байт = 2¹² байт, то <b>младшие 12 бит</b> адреса — это смещение внутри страницы. В шестнадцатеричной записи это <b>последние 3 цифры</b>, а всё, что левее, — номер страницы.</li>
+<li>Физическую страницу называют <b>фреймом</b>. <b>Физический адрес = фрейм × 4096 + смещение.</b> В hex это просто номер фрейма, к которому приписаны те же 3 цифры смещения.</li>
+<li>Пример: 0x2F10 → страница 2, смещение 0xF10. Если странице 2 соответствует фрейм 7, физический адрес 0x7F10.</li>
+<li>Если номер страницы больше лимита сегмента, происходит <b>Segmentation fault</b>: процесс обратился к чужой памяти.</li>
+</ul>`,
+    parts: [
+    { type: "hexsplit", title: "Разбей адрес",
+      prompt: "Введи любой шестнадцатеричный адрес и посмотри, как он делится на страницу и смещение. Попробуй хотя бы три разных адреса, например 0x2F10, 0x0ABC, 0x3001." },
+    { type: "mc", q: "Почему при странице 4096 байт смещение занимает именно 12 бит?", opts: ["Так договорились производители процессоров","4096 = 2¹², и 12 бит хватает, чтобы пронумеровать каждый байт страницы","Потому что адрес всегда 12-битный"], c: 1, w: "12 бит дают 4096 разных значений — ровно по одному на каждый байт страницы." },
+    { type: "mc", q: "Логический адрес 0x5A3C. Номер страницы и смещение?", opts: ["Страница 5, смещение 0xA3C","Страница 0x5A, смещение 0x3C","Страница 0xA3C, смещение 5"], c: 0, w: "Последние три hex-цифры — смещение, остальное — номер страницы." },
+    { type: "mc", q: "Странице соответствует фрейм 3, смещение 0x1B4. Физический адрес?", opts: ["0x1B43","0x31B4","0x0304"], c: 1, w: "Номер фрейма + те же три цифры смещения: 0x3 и 0x1B4 → 0x31B4." }
+    ]
+  },
+  { name: "Симулятор", min: 16,
+    brief: `<p>Перед тобой учебный процесс <b>proc_7</b>: три сегмента, у каждого свой лимит и своя таблица страниц. Твоя задача — для каждого обращения найти страницу, смещение, фрейм и физический адрес.</p>
+<p class="small muted">Порядок действий: 1) отделить 3 последние hex-цифры — это смещение; 2) остаток — номер страницы; 3) проверить, не больше ли он лимита сегмента; 4) найти фрейм в таблице; 5) приписать к фрейму смещение.</p>`,
+    parts: [
+    { type: "fill", title: "Обращение 1", fig: addrTask("Код","0x1A04"),
+      items: [
+        {a:"Номер страницы:", o:["0","1","0x1A"], c:1, z:""},
+        {a:"Смещение:", o:["0xA04","0x04","0x1A0"], c:0, z:""},
+        {a:"Фрейм:", o:["4","9","1"], c:1, z:""},
+        {a:"Физический адрес:", o:["0x1A09","0x9A04","0x4A04","Segmentation fault"], c:1, z:""}
+      ]},
+    { type: "fill", title: "Обращение 2", fig: addrTask("Данные","0x0FFF"),
+      items: [
+        {a:"Номер страницы:", o:["0","1","0xF"], c:0, z:""},
+        {a:"Смещение:", o:["0xFF","0xFFF","0x0FF"], c:1, z:""},
+        {a:"Фрейм:", o:["6","12","4"], c:0, z:""},
+        {a:"Физический адрес:", o:["0x6FFF","0x0FF6","0xCFFF","Segmentation fault"], c:0, z:""}
+      ]},
+    { type: "fill", title: "Обращение 3", fig: addrTask("Стек","0x2350"),
+      items: [
+        {a:"Номер страницы:", o:["3","2","0x23"], c:1, z:""},
+        {a:"Смещение:", o:["0x350","0x50","0x235"], c:0, z:""},
+        {a:"Фрейм:", o:["3","10","5"], c:2, z:""},
+        {a:"Физический адрес:", o:["0x3350","0x5350","0xA350","Segmentation fault"], c:1, z:""}
+      ]},
+    { type: "fill", title: "Обращение 4", fig: addrTask("Данные","0x2010"),
+      items: [
+        {a:"Номер страницы:", o:["0","1","2"], c:2, z:""},
+        {a:"Входит ли страница в лимит сегмента «Данные»?", o:["Да","Нет: у сегмента только страницы 0 и 1"], c:1, z:""},
+        {a:"Результат обращения:", o:["0x6010","0xC010","Segmentation fault"], c:2, z:""}
+      ]}
+    ]
+  },
+  { name: "Глазами тестировщика", min: 8,
+    brief: `<ul>
+<li>Для тестировщика <b>Segmentation fault</b> — это падение программы с конкретной причиной: обращение за пределы выделенной сегменту памяти.</li>
+<li>Типичные причины: выход за границу массива, обращение по «битому» указателю, переполнение стека из-за бесконечной рекурсии.</li>
+<li>В отчёте об ошибке важно указать, <b>что</b> делали, <b>какой адрес и сегмент</b> вызвали сбой и <b>как воспроизвести</b>.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Сбой или норма?", prompt: "Для процесса proc_7 определи, чем закончится обращение.",
+      bins: [{id:"ok",label:"Корректный доступ"},{id:"sf",label:"Segmentation fault"}],
+      items: [
+        {t:"Код, 0x2004", b:"ok", w:"Страница 2 — последняя допустимая у сегмента «Код»."},
+        {t:"Код, 0x3004", b:"sf", w:"Страница 3, а у кода только 0–2."},
+        {t:"Стек, 0x3FFF", b:"ok", w:"Страница 3 — последняя у стека, смещение в пределах страницы."},
+        {t:"Стек, 0x4000", b:"sf", w:"Страница 4: стек закончился. Так выглядит переполнение стека."},
+        {t:"Данные, 0x1800", b:"ok", w:"Страница 1 входит в лимит."}
+      ]},
+    { type: "mc", q: "Тестировщик видит Segmentation fault при обращении к стеку по адресу 0x4000. Что вероятнее всего произошло в программе?", opts: ["Закончилось место на диске","Стек переполнился, например из-за слишком глубокой рекурсии","Пользователь ввёл неверный пароль"], c: 1, w: "Обращение сразу за последней страницей стека — классическое переполнение стека." },
+    { type: "mc", q: "Что обязательно указать в отчёте о таком сбое?", opts: ["Только «программа упала»","Шаги воспроизведения, сегмент и адрес обращения, ожидаемый и фактический результат","Скриншот рабочего стола"], c: 1, w: "По этим данным разработчик сможет повторить и найти ошибку." }
+    ]
+  }
+  ]
+};
+
+/* ============ 5 ноября · Архитектура аппаратных средств ============ */
+const PIPE = `<table class="tt" style="font-size:13px"><tr><th>Такт</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+<tr><th>Команда 1</th><td>IF</td><td>ID</td><td>EX</td><td>MEM</td><td>WB</td><td></td><td></td></tr>
+<tr><th>Команда 2</th><td></td><td>IF</td><td>ID</td><td>EX</td><td>MEM</td><td>WB</td><td></td></tr>
+<tr><th>Команда 3</th><td></td><td></td><td>IF</td><td>ID</td><td>EX</td><td>MEM</td><td>WB</td></tr></table>`;
+LESSONS.arch5 = {
+  title: "Ускоряем фильтр", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Программа фильтрует массив показаний датчиков: миллион чисел, к каждому применяется одна и та же формула. Работает медленно. Прежде чем переписывать код, разберёмся, какие возможности процессора помогут её ускорить.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Регистры", min: 6,
+    brief: `<ul>
+<li><b>Регистры</b> — самая быстрая память, прямо внутри процессора. С ними работают команды.</li>
+<li>В <b>x86-64</b>: <b>RAX</b> — регистр общего назначения (часто для результата операций), <b>RIP</b> — указатель команд (адрес следующей команды), <b>RFLAGS</b> — флаги результата (ноль, перенос, знак, переполнение).</li>
+<li>В <b>ARM64</b>: <b>X0–X30</b> — 31 регистр общего назначения.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Какая архитектура?", prompt: "К какой архитектуре относится регистр?",
+      bins: [{id:"x",label:"x86-64"},{id:"a",label:"ARM64"}],
+      items: [
+        {t:"RAX", b:"x", w:"Регистр общего назначения x86-64."},
+        {t:"RIP", b:"x", w:"Указатель команд x86-64."},
+        {t:"RFLAGS", b:"x", w:"Регистр флагов x86-64."},
+        {t:"X0–X30", b:"a", w:"Регистры общего назначения ARM64."}
+      ]},
+    { type: "mc", q: "Что хранит регистр RIP?", opts: ["Результат последнего сложения","Адрес следующей команды","Флаги переполнения"], c: 1, w: "По RIP процессор знает, какую команду выбирать следующей." },
+    { type: "mc", q: "После сравнения двух чисел процессор решает, делать ли переход. Где он смотрит результат сравнения?", opts: ["В RFLAGS","В RAX","В оперативной памяти"], c: 0, w: "Сравнение выставляет флаги, а команда перехода их проверяет." }
+    ]
+  },
+  { name: "Конвейер", min: 10,
+    brief: `<p>Выполнение команды делят на стадии: <b>IF</b> — выборка, <b>ID</b> — декодирование, <b>EX</b> — исполнение, <b>MEM</b> — обращение к памяти, <b>WB</b> — запись результата. На <b>конвейере</b> следующая команда начинается, не дожидаясь конца предыдущей:</p>
+${PIPE}
+<ul>
+<li>Без конвейера 3 команды по 5 стадий заняли бы 15 тактов, на конвейере — 7.</li>
+<li><b>Опасности (конфликты) конвейера:</b> <b>по данным</b> — команде нужен результат предыдущей, который ещё не готов; <b>по управлению</b> — переход: неизвестно, какую команду выбирать дальше; <b>структурные</b> — двум командам одновременно нужен один и тот же блок.</li>
+</ul>`,
+    parts: [
+    { type: "mc", q: "Сколько тактов займут 10 команд на 5-стадийном конвейере без задержек?", opts: ["50","14","10"], c: 1, w: "Первая команда — 5 тактов, каждая следующая добавляет по 1: 5 + 9 = 14." },
+    { type: "classify", title: "Какой конфликт?", prompt: "Определи тип опасности конвейера.",
+      bins: [{id:"d",label:"По данным"},{id:"c",label:"По управлению"},{id:"s",label:"Структурный"}],
+      items: [
+        {t:"Команда 2 складывает число с результатом команды 1, а он ещё не записан", b:"d", w:"Зависимость по данным."},
+        {t:"В цикле фильтра условный переход: продолжать или выйти — станет ясно только после сравнения", b:"c", w:"Неизвестно, какую команду выбирать дальше."},
+        {t:"Двум командам одновременно нужен единственный блок обращения к памяти", b:"s", w:"Не хватает аппаратного ресурса."},
+        {t:"Команда записывает значение в RAX, а следующая сразу его читает", b:"d", w:"Снова зависимость по данным."}
+      ]}
+    ]
+  },
+  { name: "Параллелизм", min: 12,
+    brief: `<ul>
+<li><b>Суперскалярность</b> — в ядре несколько исполнительных блоков, и за такт запускается несколько независимых команд.</li>
+<li><b>Векторные блоки (SIMD): SSE, AVX у x86, NEON у ARM</b> — одна команда обрабатывает сразу много чисел: например, AVX — 8 чисел float за раз.</li>
+<li><b>Матричные ускорители (AMX)</b> — умножают целые матрицы, используются в машинном обучении.</li>
+<li><b>Hyper-Threading / SMT</b> — одно физическое ядро выполняет два потока, заполняя простаивающие блоки.</li>
+<li><b>Внеочередное исполнение</b> — процессор переставляет независимые команды, чтобы не простаивать, пока одна ждёт данные.</li>
+</ul>`,
+    parts: [
+    { type: "classify", title: "Что это за технология?", prompt: "Сопоставь описание и технологию.",
+      bins: [{id:"ss",label:"Суперскалярность"},{id:"v",label:"SIMD (SSE/AVX/NEON)"},{id:"smt",label:"SMT"},{id:"ooo",label:"Внеочередное"},{id:"amx",label:"AMX"}],
+      items: [
+        {t:"Одна команда складывает сразу 8 пар чисел", b:"v", w:"Одна инструкция — много данных."},
+        {t:"За один такт запускаются сложение и умножение из разных независимых команд", b:"ss", w:"Несколько исполнительных блоков работают одновременно."},
+        {t:"Операционная система видит 8 логических процессоров на 4 физических ядрах", b:"smt", w:"По два потока на ядро."},
+        {t:"Пока команда ждёт данные из памяти, процессор выполняет следующую, независимую от неё", b:"ooo", w:"Порядок исполнения меняется, результат — нет."},
+        {t:"Блок для быстрого умножения матриц в задачах нейросетей", b:"amx", w:"Матричный ускоритель."}
+      ]},
+    { type: "mc", q: "Фильтр применяет одну и ту же формулу к миллиону чисел. Какая технология даст самый заметный выигрыш?", opts: ["Векторные инструкции (AVX или NEON): обрабатывать по 8 чисел за команду","Hyper-Threading","Режим long mode"], c: 0, w: "Одинаковая операция над большим массивом — идеальный случай для SIMD." },
+    { type: "mc", q: "В цикле фильтра есть условие «если значение больше порога». Что мешает конвейеру больше всего?", opts: ["Структурный конфликт","Конфликт по управлению: условный переход","Нехватка регистров X0–X30"], c: 1, w: "На каждом условном переходе конвейер может «угадать» неверно и сбросить начатые команды." }
+    ]
+  },
+  { name: "Режимы x86", min: 6,
+    brief: `<ul>
+<li><b>Реальный режим</b> — режим первых процессоров 8086: 16 бит, около 1 МБ памяти, никакой защиты. Современные процессоры x86 стартуют в нём при включении.</li>
+<li><b>Защищённый режим</b> — 32 бита, защита памяти, виртуальная память, многозадачность.</li>
+<li><b>Режим виртуального 8086 (v86)</b> — запуск старых 16-битных программ внутри защищённого режима.</li>
+<li><b>Long mode</b> — 64-битный режим, в нём работают современные 64-битные ОС.</li>
+</ul>`,
+    parts: [
+    { type: "order", title: "По порядку появления", prompt: "Расставь режимы x86 от самого раннего к самому позднему.",
+      items: ["Реальный режим","Защищённый режим","Режим виртуального 8086","Long mode"] },
+    { type: "mc", q: "В каком режиме работает 64-битная Windows или Linux?", opts: ["Реальный","Защищённый 32-битный","Long mode"], c: 2, w: "64-битные ОС используют long mode." }
+    ]
+  }
+  ]
+};
+
+/* ============ 5 ноября · ИТ в профессиональной деятельности ============ */
+const SALES = [["Иванова", "Январь", "Ноутбуки", 74700], ["Иванова", "Январь", "Мониторы", 19700], ["Иванова", "Январь", "Аксессуары", 5500], ["Иванова", "Январь", "Аксессуары", 7600], ["Иванова", "Февраль", "Ноутбуки", 63000], ["Иванова", "Февраль", "Ноутбуки", 83100], ["Иванова", "Февраль", "Мониторы", 19300], ["Иванова", "Февраль", "Мониторы", 31800], ["Иванова", "Февраль", "Аксессуары", 4000], ["Иванова", "Март", "Ноутбуки", 53000], ["Иванова", "Март", "Мониторы", 36700], ["Иванова", "Март", "Аксессуары", 5700], ["Иванова", "Март", "Аксессуары", 2300], ["Иванова", "Март", "Аксессуары", 4400], ["Петров", "Январь", "Ноутбуки", 57200], ["Петров", "Январь", "Мониторы", 39100], ["Петров", "Январь", "Мониторы", 35200], ["Петров", "Январь", "Аксессуары", 8000], ["Петров", "Январь", "Аксессуары", 6400], ["Петров", "Февраль", "Ноутбуки", 50700], ["Петров", "Февраль", "Ноутбуки", 89800], ["Петров", "Февраль", "Ноутбуки", 49700], ["Петров", "Февраль", "Мониторы", 34800], ["Петров", "Февраль", "Аксессуары", 3200], ["Петров", "Февраль", "Аксессуары", 4700], ["Петров", "Март", "Ноутбуки", 62200], ["Петров", "Март", "Ноутбуки", 81200], ["Петров", "Март", "Мониторы", 38500], ["Петров", "Март", "Мониторы", 21900], ["Петров", "Март", "Мониторы", 39900], ["Петров", "Март", "Аксессуары", 5300], ["Сидоров", "Январь", "Ноутбуки", 55400], ["Сидоров", "Январь", "Ноутбуки", 52400], ["Сидоров", "Январь", "Мониторы", 15500], ["Сидоров", "Январь", "Мониторы", 26900], ["Сидоров", "Январь", "Аксессуары", 2100], ["Сидоров", "Февраль", "Ноутбуки", 73000], ["Сидоров", "Февраль", "Мониторы", 36700], ["Сидоров", "Февраль", "Мониторы", 16100], ["Сидоров", "Февраль", "Мониторы", 20400], ["Сидоров", "Февраль", "Аксессуары", 5800], ["Сидоров", "Март", "Ноутбуки", 80600], ["Сидоров", "Март", "Ноутбуки", 45900], ["Сидоров", "Март", "Мониторы", 18700], ["Сидоров", "Март", "Аксессуары", 6400], ["Сидоров", "Март", "Аксессуары", 3500], ["Сидоров", "Март", "Аксессуары", 8800], ["Козлова", "Январь", "Ноутбуки", 57200], ["Козлова", "Январь", "Ноутбуки", 56300], ["Козлова", "Январь", "Ноутбуки", 78100], ["Козлова", "Январь", "Мониторы", 31500], ["Козлова", "Январь", "Аксессуары", 3000], ["Козлова", "Январь", "Аксессуары", 6800], ["Козлова", "Февраль", "Ноутбуки", 45200], ["Козлова", "Февраль", "Мониторы", 25700], ["Козлова", "Февраль", "Мониторы", 20500], ["Козлова", "Февраль", "Аксессуары", 8500], ["Козлова", "Февраль", "Аксессуары", 8800], ["Козлова", "Март", "Ноутбуки", 86800], ["Козлова", "Март", "Ноутбуки", 73800], ["Козлова", "Март", "Ноутбуки", 76000], ["Козлова", "Март", "Мониторы", 28600], ["Козлова", "Март", "Аксессуары", 5900]];
+LESSONS.itpd11 = {
+  title: "Отчёт по продажам", theme: "brand",
+  ui: { introStamp: "Практика", start: "Начать", brief: "Теория", doneStamp: "Готово", submit: "Сдать" },
+  intro: `<p>Магазин техники выгрузил продажи за первый квартал: 63 сделки, четыре менеджера, три категории товаров. Тимлид просит ответить на несколько вопросов по этим данным. Перебирать 63 строки вручную долго — для этого и нужны сводные таблицы.</p>
+<p class="muted small sans">Перед каждым заданием есть короткая теория. Каждый этап засчитывается с первой попытки, после проверки ты увидишь разбор. В конце результат сам отправится преподавателю.</p>`,
+  stages: [
+  { name: "Как устроена сводная", min: 8,
+    brief: `<p><b>Сводная таблица</b> группирует и считает данные без формул. У неё 4 области:</p>
+<ul>
+<li><b>Строки</b> — по какому полю группировать (например, по менеджерам).</li>
+<li><b>Столбцы</b> — второе поле для разбивки (например, по месяцам). Получается таблица «менеджер × месяц».</li>
+<li><b>Значения</b> — что считать и как: сумма, среднее, количество.</li>
+<li><b>Фильтры</b> — какие строки исходных данных учитывать. Удобный наглядный фильтр — <b>срез</b>: кнопки с категориями.</li>
+</ul>
+<p>Ещё значения можно показывать как <b>% от общего итога</b> — долю каждой ячейки во всей сумме. Если исходные данные изменились, сводную нужно <b>обновить</b>.</p>`,
+    parts: [
+    { type: "classify", title: "В какую область?", prompt: "Тимлид хочет отчёт «продажи каждого менеджера по месяцам, только по ноутбукам». Куда поставить поля?",
+      bins: [{id:"r",label:"Строки"},{id:"c",label:"Столбцы"},{id:"v",label:"Значения"},{id:"f",label:"Фильтр / срез"}],
+      items: [
+        {t:"Менеджер", b:"r", w:"Каждый менеджер — отдельная строка."},
+        {t:"Месяц", b:"c", w:"Месяцы идут по столбцам."},
+        {t:"Сумма продажи", b:"v", w:"Это то, что считаем."},
+        {t:"Категория = Ноутбуки", b:"f", w:"Отбираем только нужные строки."}
+      ]},
+    { type: "mc", q: "Нужно узнать, сколько сделок провёл каждый менеджер. Какую агрегацию выбрать?", opts: ["Сумма","Среднее","Количество"], c: 2, w: "Количество считает строки, а не складывает суммы." },
+    { type: "mc", q: "В исходные данные добавили новые сделки, а сводная показывает старые цифры. Что сделать?", opts: ["Пересоздать файл","Обновить сводную таблицу","Ничего: она обновится сама через сутки"], c: 1, w: "Сводная — снимок данных. После изменений её обновляют." }
+    ]
+  },
+  { name: "Конструктор", min: 25,
+    brief: `<p>Теперь собери сводную сам. Меняй строки, столбцы, агрегацию, режим «% от общего итога» и срез по категории — таблица пересчитывается сразу. Под конструктором вопросы тимлида: найди на каждый ответ, перестраивая таблицу.</p>
+<p class="small muted">Подсказка: для каждого вопроса подумай, что поставить в строки, что в столбцы и нужен ли срез.</p>`,
+    parts: [
+    { type: "pivot", title: "Продажи за I квартал", data: SALES,
+      prompt: "Настрой сводную таблицу и ответь на вопросы.",
+      qs: [
+        {q:"Общая выручка за квартал:", o:["2 119 500 ₽","1 445 300 ₽","559 500 ₽"], c:0, w:"Общий итог при любой разбивке без среза."},
+        {q:"Сколько продал Петров в феврале?", o:["209 400 ₽","232 900 ₽","454 500 ₽"], c:1, w:"Строки — менеджер, столбцы — месяц, ячейка «Петров × Февраль»."},
+        {q:"Кто лучший менеджер в категории «Мониторы»?", o:["Сидоров","Иванова","Петров"], c:2, w:"Срез «Мониторы», строки — менеджер: у Петрова 209 400 ₽."},
+        {q:"Какую долю общей выручки принесла Козлова?", o:["25,0 %","28,9 %","21,4 %"], c:1, w:"Строки — менеджер, «показывать как % от общего итога»."},
+        {q:"Средняя сумма сделки у Сидорова:", o:["29 263 ₽","134 300 ₽","46 800 ₽"], c:0, w:"Агрегация «Среднее», строки — менеджер."},
+        {q:"В каком месяце выручка по ноутбукам была наибольшей?", o:["Январь","Февраль","Март"], c:2, w:"Срез «Ноутбуки», строки — месяц: в марте 559 500 ₽."}
+      ]}
+    ]
+  },
+  { name: "Итог", min: 4,
+    brief: `<p>Два вопроса напоследок.</p>`,
+    parts: [
+    { type: "mc", q: "Чем срез удобнее обычного фильтра?", opts: ["Он наглядный: видно, какая категория выбрана, и переключаться можно одним нажатием","Он удаляет лишние строки из исходных данных","Он работает без сводной таблицы"], c: 0, w: "Срез — тот же фильтр, но в виде понятных кнопок." },
+    { type: "mc", q: "Почему для «доли менеджера» лучше показывать % от общего итога, а не считать вручную?", opts: ["Так красивее","Проценты пересчитаются сами при любом срезе и обновлении","Excel не умеет делить"], c: 1, w: "Режим отображения пересчитывается вместе с таблицей." }
+    ]
+  }
+  ]
+};
+
 /* ===================== ДВИЖОК ===================== */
 const $ = s => document.querySelector(s);
 const app = $("#app");
@@ -566,9 +812,9 @@ async function syncClock(){
   } catch(e) {}
 }
 const now = () => Date.now() + clockShift;
-function mskTime(hm){ // момент начала по Москве (UTC+3)
+function mskTime(hm, date){ // момент по Москве (UTC+3)
   if (!hm) return null;
-  const [y,m,d] = CONFIG.DATE.split("-").map(Number); const [h,mi] = hm.split(":").map(Number);
+  const [y,m,d] = (date || CONFIG.DATE).split("-").map(Number); const [h,mi] = hm.split(":").map(Number);
   return Date.UTC(y, m-1, d, h-3, mi);
 }
 const localHM = t => new Date(t).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
@@ -578,6 +824,9 @@ function partMax(p){
   if (p.type === "reveal") return p.items.length * 3;
   if (p.type === "truth") return 1 << p.vars.length;
   if (p.type === "dnf") return 2;
+  if (p.type === "venn") return 3;
+  if (p.type === "proofread") return (p.text.match(/\[\[/g) || []).length;
+  if (p.type === "pivot") return p.qs.length;
   if (p.type === "grid") return p.rows.length * p.cols.length;
   if (p.type === "budget") return p.risks.length + p.bonus;
   if (p.type === "audit") return p.rows.length + p.rows.filter(r => r.err).length;
@@ -598,7 +847,7 @@ function home(){
   let html = `<div class="card folder">
     <span class="tag">${esc(CONFIG.SUBTITLE)}</span>
     <h1>${esc(CONFIG.TITLE).replace(/(\d)-(\d)/g,"$1\u2011$2")}</h1>
-    <p class="muted sans small">Расписание на ${new Date(CONFIG.DATE+"T12:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long"})} · время московское</p>`;
+    <p class="muted sans small">Расписание занятий · время московское</p>`;
   if (!prof){
     html += `<label for="nm">Фамилия и имя — как на платформе</label>
       <input type="text" id="nm" placeholder="Иванов Иван" autocomplete="name">
@@ -614,8 +863,14 @@ function home(){
   html += `<div class="row sans small"><span><b>${esc(prof.name)}</b> · группа ${esc(prof.group)}</span>
     <button class="link" id="chg">это не я</button></div></div>`;
   const t = now();
-  SCHEDULE.forEach(s => {
-    const st = mskTime(s.start), en = mskTime(s.end);
+  const today = new Date(t + 3*3600e3).toISOString().slice(0,10);
+  const dateOf = s => s.date || CONFIG.DATE;
+  const dates = [...new Set(SCHEDULE.map(dateOf))].sort((x,y) => (x === today ? -1 : y === today ? 1 : y.localeCompare(x)));
+  const dname = d => new Date(d+"T12:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",weekday:"long"});
+  dates.forEach(d => {
+    html += `<h3 class="dayhead">${d === today ? "Сегодня, " : d < today ? "Прошлые занятия · " : ""}${dname(d)}</h3>`;
+    SCHEDULE.filter(s => dateOf(s) === d).forEach(s => {
+    const st = mskTime(s.start, d), en = mskTime(s.end, d);
     const done = load("res_" + s.id);
     let status = "", cls = "", open = !s.soon;
     if (s.soon){ status = `<span class="status lock">готовится</span>`; }
@@ -629,6 +884,7 @@ function home(){
       <div class="time">${s.start || "—"}${s.end ? "–"+s.end : ""}${localNote}</div>
       <div class="body"><span class="tag">${esc(s.subject)}</span><h3>${esc(s.title)}</h3>${s.note?`<p class="muted small" style="margin:0">${esc(s.note)}</p>`:""}</div>
       <div>${status}</div></div>`;
+    });
   });
   if (CONFIG.TEST_MODE) html += `<p style="text-align:center"><button class="link sans small" id="rst">Сбросить прогресс (режим проверки)</button></p>`;
   app.innerHTML = html;
@@ -655,7 +911,7 @@ function persist(){ save("ls_" + LID, S) }
 function total(){ return S.scores.reduce((a,b)=>a+(b||0),0) }
 function header(){
   const steps = L.stages.map((_,i)=>`<i class="${i < S.stage ? "on" : i === S.stage ? "cur" : ""}"></i>`).join("");
-  return `<div class="top"><button class="link" id="back">← В кабинет</button><span class="pts">${total()} баллов</span></div><div class="steps">${steps}</div>`;
+  return `<div class="top"><button class="link" id="back">← В кабинет</button><span class="pts">Баллы: ${total()}</span></div><div class="steps">${steps}</div>`;
 }
 function bindBack(){ $("#back").onclick = () => { LID = null; home(); } }
 function intro(){
@@ -971,6 +1227,121 @@ budget(p, el, done){
     $("#w").innerHTML = `<div class="note"><b>Риски школы:</b><ul style="margin:6px 0 0;padding-left:20px">${p.risks.map(r=>`<li>${cov.has(r.id) ? "✅" : "❌"} ${r.t}</li>`).join("")}</ul>
       <p style="margin:8px 0 0">Закрыто рисков: <b>${cov.size} из ${p.risks.length}</b>. ${waste.length ? "Часть бюджета ушла на меры, которые не закрывают ни одного риска школы." : `Ни одной лишней траты: +${p.bonus}.`}</p></div><p></p>`;
     const b = $("#ck"); b.disabled = false; b.textContent = `${got} из ${partMax(p)} · Дальше →`; b.onclick = () => done(got);
+  };
+},
+hexsplit(p, el, done){
+  const seen = new Set();
+  el.innerHTML = `<span class="tag">Интерактив</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <input type="text" id="hx" value="0x2F10" style="font-family:Consolas,Menlo,monospace;font-size:20px" aria-label="Адрес">
+  <div id="hv" style="margin:14px 0"></div><button class="btn" id="nx" disabled>Попробуй ещё адреса</button>`;
+  const draw = () => {
+    const raw = $("#hx").value.trim().replace(/^0x/i,"");
+    if (!/^[0-9a-f]{1,4}$/i.test(raw)){ $("#hv").innerHTML = `<p class="muted">Введи от 1 до 4 hex-цифр, например 0x2F10.</p>`; return; }
+    const v = parseInt(raw,16), bin = v.toString(2).padStart(16,"0"), hex = v.toString(16).toUpperCase().padStart(4,"0");
+    seen.add(v);
+    $("#hv").innerHTML = `<div class="codebox" style="font-size:18px;line-height:1.8">
+      <span style="background:#dfe8fc;padding:2px 4px;border-radius:4px">${bin.slice(0,4)}</span> <span style="background:#EFFE74;padding:2px 4px;border-radius:4px">${bin.slice(4,8)} ${bin.slice(8,12)} ${bin.slice(12)}</span><br>
+      <span style="background:#dfe8fc;padding:2px 4px;border-radius:4px">0x${hex[0]}</span> <span style="background:#EFFE74;padding:2px 4px;border-radius:4px">0x${hex.slice(1)}</span></div>
+      <p class="sans" style="margin-top:10px"><span style="background:#dfe8fc;padding:2px 6px;border-radius:4px">страница ${parseInt(hex[0],16)}</span> старшие 4 бита · <span style="background:#EFFE74;padding:2px 6px;border-radius:4px">смещение 0x${hex.slice(1)}</span> младшие 12 бит</p>`;
+    if (seen.size >= 3){ $("#nx").disabled = false; $("#nx").textContent = "Дальше →"; }
+  };
+  $("#hx").oninput = draw; draw();
+  $("#nx").onclick = () => done(0);
+},
+venn(p, el, done){
+  const R = {a:"только A", ab:"A и B", b:"только B", n:"вне A и B"}, on = new Set();
+  const A = [125,105], B = [205,105], r = 72;
+  const svg = () => `<svg viewBox="0 0 330 210" id="vs" style="width:100%;max-width:420px;display:block;margin:8px 0;cursor:pointer;touch-action:manipulation">
+   <defs><mask id="mA${p.k}"><rect width="330" height="210" fill="#fff"/><circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#000"/></mask>
+   <mask id="mB${p.k}"><rect width="330" height="210" fill="#fff"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#000"/></mask>
+   <clipPath id="cB${p.k}"><circle cx="${B[0]}" cy="${B[1]}" r="${r}"/></clipPath></defs>
+   <rect x="5" y="5" width="320" height="200" rx="12" fill="${on.has("n")?"#7199F1":"#fff"}" stroke="#222" stroke-width="1.5"/>
+   <circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#fff"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#fff"/>
+   ${on.has("a")?`<circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#7199F1" mask="url(#mB${p.k})"/>`:""}
+   ${on.has("b")?`<circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="#7199F1" mask="url(#mA${p.k})"/>`:""}
+   ${on.has("ab")?`<circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="#7199F1" clip-path="url(#cB${p.k})"/>`:""}
+   <circle cx="${A[0]}" cy="${A[1]}" r="${r}" fill="none" stroke="#222" stroke-width="2"/><circle cx="${B[0]}" cy="${B[1]}" r="${r}" fill="none" stroke="#222" stroke-width="2"/>
+   <text x="20" y="28" font-family="sans-serif" font-weight="700" font-size="15">U</text>
+   <text x="${A[0]-40}" y="${A[1]-50}" font-family="sans-serif" font-weight="700" font-size="16">A</text>
+   <text x="${B[0]+32}" y="${B[1]-50}" font-family="sans-serif" font-weight="700" font-size="16">B</text></svg>`;
+  el.innerHTML = `<span class="tag">Диаграмма ${p.k}</span><h2>${p.title}</h2>${p.fig || ""}<p>${p.q}</p>
+   <div id="vd">${svg()}</div><p class="sans small muted">Нажимай на области, чтобы закрасить их. Повторное нажатие снимает закраску.</p>
+   <div class="fill item"><label style="margin:0">Формула:</label><select id="vf"><option value="">…</option>${p.formulas.map((o,i)=>`<option value="${i}">${o}</option>`).join("")}</select></div>
+   <div class="fill item"><label style="margin:0">Сколько тестировщиков в этом множестве?</label><select id="vc"><option value="">…</option>${p.counts.map((o,i)=>`<option value="${i}">${o}</option>`).join("")}</select></div>
+   <div id="w"></div><button class="btn" id="ck" disabled>Проверить</button>`;
+  const ready = () => $("#ck").disabled = !(on.size && $("#vf").value !== "" && $("#vc").value !== "");
+  const bind = () => { $("#vs").onclick = e => {
+    if (el.classList.contains("checked")) return;
+    const bx = $("#vs").getBoundingClientRect(), x = (e.clientX - bx.left) * 330 / bx.width, y = (e.clientY - bx.top) * 210 / bx.height;
+    const inA = Math.hypot(x-A[0], y-A[1]) <= r, inB = Math.hypot(x-B[0], y-B[1]) <= r;
+    const id = inA && inB ? "ab" : inA ? "a" : inB ? "b" : "n";
+    on.has(id) ? on.delete(id) : on.add(id); $("#vd").innerHTML = svg(); bind(); ready();
+  }};
+  bind(); $("#vf").onchange = ready; $("#vc").onchange = ready;
+  $("#ck").onclick = () => {
+    el.classList.add("checked");
+    const okR = p.regions.length === on.size && p.regions.every(x => on.has(x));
+    const okF = +$("#vf").value === p.f, okC = +$("#vc").value === p.c, got = okR + okF + okC;
+    $("#vf").disabled = $("#vc").disabled = true;
+    on.clear(); p.regions.forEach(x => on.add(x)); $("#vd").innerHTML = svg();
+    $("#w").innerHTML = `<div class="note"><b>${got} из 3.</b> Области: ${okR ? "верно" : "правильные закрашены на диаграмме"}. Формула: ${okF ? "верно" : p.formulas[p.f]}. Количество: ${okC ? "верно" : p.counts[p.c]}.<br>${p.w}</div><p></p>`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+proofread(p, el, done){
+  const marks = new Set();
+  let i = 0; const html = p.text.replace(/\[\[(.+?)\|(err|ok)\]\]/g, (_, w) => `<span class="pw" data-i="${i++}">${w}</span>`);
+  const keys = [...p.text.matchAll(/\[\[(.+?)\|(err|ok)\]\]/g)].map(m => m[2]);
+  el.innerHTML = `<span class="tag">Задание</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div class="refcard letter">${html}</div><div id="w"></div><button class="btn" id="ck">Проверить</button>`;
+  el.querySelectorAll(".pw").forEach(s => s.onclick = () => { if (el.classList.contains("checked")) return; const k = +s.dataset.i; marks.has(k) ? marks.delete(k) : marks.add(k); s.classList.toggle("on", marks.has(k)); });
+  $("#ck").onclick = () => {
+    el.classList.add("checked"); let got = 0;
+    el.querySelectorAll(".pw").forEach(s => { const k = +s.dataset.i, err = keys[k] === "err", ok = marks.has(k) === err; if (ok) got++; s.classList.add(err ? "perr" : "pok"); if (!ok) s.classList.add("miss"); });
+    $("#w").innerHTML = `<div class="note"><b>${got} из ${keys.length}.</b> Красным подчёркнуты настоящие ошибки, зелёным — слова, которые написаны верно. Рамкой отмечено, где ты ошибся.</div><p></p>`;
+    const b = $("#ck"); b.textContent = "Дальше →"; b.onclick = () => done(got);
+  };
+},
+pivot(p, el, done){
+  const F = {m:"Менеджер", mo:"Месяц", c:"Категория"}, idx = {m:0, mo:1, c:2};
+  const order = {mo:["Январь","Февраль","Март"]};
+  const st = {rows:"m", cols:"", agg:"sum", show:"val", filt:""};
+  const fmt = v => st.show === "pct" ? v.toFixed(1).replace(".",",") + " %" : Math.round(v).toLocaleString("ru-RU") + " ₽";
+  const vals = k => { const u = [...new Set(p.data.map(r => r[idx[k]]))]; return order[k] ? order[k].filter(x => u.includes(x)) : u.sort(); };
+  const opt = (id, list, cur) => `<select id="${id}">${list.map(([v,l]) => `<option value="${v}" ${v===cur?"selected":""}>${l}</option>`).join("")}</select>`;
+  const fields = [["m","Менеджер"],["mo","Месяц"],["c","Категория"]];
+  el.innerHTML = `<span class="tag">Конструктор</span><h2>${p.title}</h2><p>${p.prompt}</p>
+  <div class="pv">
+   <div><label>Строки</label>${opt("pvr", fields, st.rows)}</div>
+   <div><label>Столбцы</label>${opt("pvc", [["","— нет —"],...fields], st.cols)}</div>
+   <div><label>Значения: Сумма продаж</label>${opt("pva", [["sum","Сумма"],["avg","Среднее"],["cnt","Количество сделок"]], st.agg)}</div>
+   <div><label>Показывать как</label>${opt("pvs", [["val","Значение"],["pct","% от общего итога"]], st.show)}</div>
+   <div><label>Срез: категория</label>${opt("pvf", [["","Все"],...vals("c").map(v=>[v,v])], st.filt)}</div>
+  </div>
+  <div id="pt" style="overflow-x:auto"></div>
+  <h3 style="margin-top:18px">Вопросы тимлида</h3>
+  ${p.qs.map((q,i)=>`<div class="fill item" data-i="${i}">${q.q}<select><option value="">…</option>${q.o.map((o,j)=>`<option value="${j}">${o}</option>`).join("")}</select><div class="why"></div></div>`).join("")}
+  <button class="btn" id="ck" disabled>Проверить ответы</button>`;
+  const draw = () => {
+    const D = p.data.filter(r => !st.filt || r[2] === st.filt), all = p.data.filter(r => !st.filt || r[2] === st.filt);
+    const R = vals(st.rows), C = st.cols && st.cols !== st.rows ? vals(st.cols) : [null];
+    const agg = rs => !rs.length ? null : st.agg === "sum" ? rs.reduce((a,r)=>a+r[3],0) : st.agg === "avg" ? rs.reduce((a,r)=>a+r[3],0)/rs.length : rs.length;
+    const grand = agg(all);
+    const cell = rs => { const v = agg(rs); if (v === null) return "—"; if (st.show === "pct") return st.agg === "avg" ? "—" : fmt(v / grand * 100); return st.agg === "cnt" ? String(v) : fmt(v); };
+    const sel = (r, c) => D.filter(x => x[idx[st.rows]] === r && (c === null || x[idx[st.cols]] === c));
+    let h = `<table class="tt pvt"><tr><th>${F[st.rows]}</th>${C.map(c=>`<th>${c ?? "Итого"}</th>`).join("")}${C[0] !== null ? "<th>Итого</th>" : ""}</tr>`;
+    R.forEach(r => { h += `<tr><th>${r}</th>${C.map(c=>`<td>${cell(sel(r,c))}</td>`).join("")}${C[0] !== null ? `<td><b>${cell(sel(r,null))}</b></td>` : ""}</tr>`; });
+    h += `<tr><th>Общий итог</th>${C.map(c=>`<td><b>${cell(D.filter(x => c === null || x[idx[st.cols]] === c))}</b></td>`).join("")}${C[0] !== null ? `<td><b>${cell(D)}</b></td>` : ""}</tr></table>`;
+    $("#pt").innerHTML = h;
+  };
+  [["pvr","rows"],["pvc","cols"],["pva","agg"],["pvs","show"],["pvf","filt"]].forEach(([id,k]) => $("#"+id).onchange = e => { st[k] = e.target.value; draw(); });
+  const sels = [...el.querySelectorAll(".fill select")];
+  sels.forEach(s => s.onchange = () => $("#ck").disabled = sels.some(z => z.value === ""));
+  draw();
+  $("#ck").onclick = () => {
+    let got = 0; el.classList.add("checked");
+    el.querySelectorAll(".fill").forEach(f => { const q = p.qs[f.dataset.i], s = f.querySelector("select"), ok = +s.value === q.c; if (ok) got++; s.disabled = true; f.classList.add(ok?"ok":"bad"); f.querySelector(".why").innerHTML = (ok ? "<b>Верно.</b> " : `<b>Правильно: ${q.o[q.c]}.</b> `) + q.w; });
+    const b = $("#ck"); b.textContent = `${got} из ${p.qs.length} · Дальше →`; b.onclick = () => done(got);
   };
 },
 text(p, el, done){
